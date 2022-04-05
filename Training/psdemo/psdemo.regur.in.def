@@ -404,17 +404,26 @@ if (cbar_temp.length >0) {
 
 
 // Product page scraping
-cbar_temp = cbar_Sizzle ('');
+cbar_temp = cbar_Sizzle ('body #product');
 if (cbar_temp.length>0){
 	
 	// Cbar Pid. scrapped generally from URL. Please make sure PIDs are always lowerCased if they are alpha-numeric
-	cbar_pattern = /\/([^\/]+)\.html/gim;
-	cbar_match= cbar_pattern.exec(document.location.pathname);	//or cbar_gup(urlParameterName)
-	if (cbar_match != null && cbar_match.length > 1)
-	{
-		cbar_pid = cbar_match[1].toLowerCase();
+	// cbar_pattern = /\/([^\/]+)\.html/gim;
+	// cbar_match= cbar_pattern.exec(document.location.pathname);	//or cbar_gup(urlParameterName)
+	// if (cbar_match != null && cbar_match.length > 1)
+	// {
+	// 	cbar_pid = cbar_match[1].toLowerCase();
+	// }
+	//--------- Abhay's Code
+
+	cbar_temp1 = cbar_Sizzle('.product-reference [itemprop=sku]');
+	if(cbar_temp1.length>0){
+		cbar_pid = cbar_temp1[0].textContent;
 	}
-	
+	//--------- Abhay's Code End
+
+
+
 	if (cbar_pid.search('tel:') >-1) { // on Ipad/iphone a number is turned into <a href="tel:1102373">1102373</a>
 		cbar_pattern = /([0-9]+)/gim; 
 		cbar_match= cbar_pattern.exec(cbar_pid); 
@@ -422,11 +431,10 @@ if (cbar_temp.length>0){
 	}
 	
 	//name	
-	cbar_temp = cbar_Sizzle('');
+	cbar_temp = cbar_Sizzle('.h1[itemprop=name]');
 	if (cbar_temp.length>0) 
 		cbar_name = cbar_temp[0].innerHTML;
-	
-	
+
 	//purl. (query parameters required for loading correct product page must be tested and included in the url, by default no parameters are included) 
 	var tmp = window.location.href.split("?");
 	cbar_purl = tmp[0];
@@ -473,7 +481,7 @@ if (cbar_temp.length>0){
 			
 	//Product image
 	// Important: Always scrape medium or large size images for product image. If you need to scrape thumbnail images (for example to display in the widget) scrape it in extra variables explained below
-	var cbar_temp = cbar_Sizzle(''); //generally from main image tag
+	var cbar_temp = cbar_Sizzle('.page-content div.images-container .product-cover > img'); //generally from main image tag
 	if (cbar_temp.length>0) {
 		
 		cbar_pic = cbar_temp[0].src;	
@@ -483,18 +491,18 @@ if (cbar_temp.length>0){
 	}
 		 
 	//Product Price
-	cbar_temp = cbar_Sizzle('span[id^="product-price"] span.price');
+	cbar_temp = cbar_Sizzle('div.product-prices .current-price>span[itemprop=price]');
 	if (cbar_temp.length>0){ 
 	
-		cbar_pri = cbar_temp[0].innerHTML.replace(/^\s+|\s+$/g,""); // trim white spaces, also remove comma from price if present
-		
+		// cbar_pri = cbar_temp[0].innerHTML.replace(/^\s+|\s+$/g,""); // trim white spaces, also remove comma from price if present
+		cbr_pri = cbar_temp[0].replace(/^\s+|\s+$/g, "");
 		// Set read only if the currency is not correct or if the site has multi currency, set read only except for default currency.		
 		// Replace the unicode(\u20AC for €) of currency symbol based on site's default currency. To find the unicode of currency symbol 
 		// please visit this link https://www.fileformat.info/info/unicode/category/Sc/list.htm 	
-		if(cbar_pri.search(/\u20AC/) == -1)
-		{
-			cbar_ro = true;
-		}	
+		// if(cbar_pri.search(/\u20AC/) == -1)
+		// {
+		// 	cbar_ro = true;
+		// }	
 	}
 	
 	
