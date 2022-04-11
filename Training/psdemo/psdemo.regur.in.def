@@ -2,7 +2,7 @@
 
 //You define a function called cbar_hold_execution. if it returns false the code runs as usual. 
 //if it returns true the code wont run and the function is called repeatedly until the conditions to continue running.
-	
+ 	
 cbar_startearly = true;
 	
 var cbar_max_wait = 0;
@@ -192,7 +192,7 @@ cbar_flow="H0:1,0,0,0,0;H1:1,0,0,0,0,0;P0:1,0,0,0,0;P1:1,0,0,0,0;C0:1,0,0,0,0;C1
 
 
 //New Mode: reset extra variables with a space to support new mode (in new mode , empty fields do not get updated)
-//cbar_extra1=" "; //deal with old price that has been removed
+cbar_extra1=" "; //deal with old price that has been removed
 //cbar_extra2 = " "; 	
 //cbar_extra3 = " "; 	
 
@@ -378,7 +378,7 @@ if (document.location.pathname=='/') cbar_home=true;
 	
 	
 // Category page scraping . Scrape for cid and cname(optional)
-cbar_temp = cbar_Sizzle (''); 
+cbar_temp = cbar_Sizzle ('body ul li.category'); 
 if (cbar_temp.length >0) {    
 	
 	// Important: when taking cids from URL its recommended to use document.location.pathname instead of cbar_url to reduce junk categories
@@ -408,19 +408,12 @@ cbar_temp = cbar_Sizzle ('body #product');
 if (cbar_temp.length>0){
 	
 	// Cbar Pid. scrapped generally from URL. Please make sure PIDs are always lowerCased if they are alpha-numeric
-	// cbar_pattern = /\/([^\/]+)\.html/gim;
-	// cbar_match= cbar_pattern.exec(document.location.pathname);	//or cbar_gup(urlParameterName)
-	// if (cbar_match != null && cbar_match.length > 1)
-	// {
-	// 	cbar_pid = cbar_match[1].toLowerCase();
-	// }
-	//--------- Abhay's Code
-
-	cbar_temp1 = cbar_Sizzle('.product-reference [itemprop=sku]');
-	if(cbar_temp1.length>0){
-		cbar_pid = cbar_temp1[0].textContent;
+	cbar_pattern = /\/([^\/]+)\.html/gim;
+	cbar_match= cbar_pattern.exec(document.location.pathname);	//or cbar_gup(urlParameterName)
+	if (cbar_match != null && cbar_match.length > 1)
+	{
+		cbar_pid = cbar_match[1].toLowerCase();
 	}
-	//--------- Abhay's Code End
 
 
 
@@ -490,7 +483,7 @@ if (cbar_temp.length>0){
 		
 	}
 		 
-	//Product Price
+	//Product Price	
 	cbar_temp = cbar_Sizzle('div.product-prices .current-price>span[itemprop=price]');
 	if (cbar_temp.length>0){ 
 	
@@ -504,6 +497,12 @@ if (cbar_temp.length>0){
 		// 	cbar_ro = true;
 		// }	
 	}
+
+	//Old-Price (extra1)
+	var cbar_temp= cbar_Sizzle('div.product-prices .product-discount>span.regular-price');
+	if (cbar_temp.length>0) {
+		cbar_extra1=cbar_temp[0].innerHTML.replace(/^\s+|\s+$/g,""); //trim
+	}
 	
 	
 	//out of stock pages..(this is different from out of stock (cbar_oos) where product info is available but the product is out of stock, here no product info is available similar to 404)
@@ -513,6 +512,8 @@ if (cbar_temp.length>0){
 			cbar_ctr1=1;
 	}
 
+
+	
 	
 	// Optional elements to scrape..
 	
@@ -536,10 +537,10 @@ if (cbar_temp.length>0){
 	*/
 	
 	//Brand or manufacturer if any. scrape into cbar_filter_val (optional)
-	var cbar_temp= cbar_Sizzle('');
-	if(cbar_temp.length>0){		
-		cbar_filter_val	= "";	
-	}
+	// var cbar_temp= cbar_Sizzle('');
+	// if(cbar_temp.length>0){		
+	// 	cbar_filter_val	= "";	
+	// }
 
 	
 	/*
@@ -566,9 +567,10 @@ if (cbar_temp.length>0){
 
 	
 //Search page scraping
-if ((cbar_url.toLowerCase().search('catalogsearch/result')>-1) && (cbar_url.toLowerCase().search('q=')> -1)){
 
-	cbar_search=cbar_gup('q');	//scrape the search keyword. generally from url parameter
+if ((cbar_url.toLowerCase().search('/search?')>-1) && (cbar_url.toLowerCase().search('s=')> -1)){
+
+	cbar_search=cbar_gup('s');	//scrape the search keyword. generally from url parameter
 }
 
 
@@ -579,7 +581,7 @@ if(cbar_home || cbar_pid || cbar_cid || cbar_search || cbar_brand || cbar_other 
 		cbar_check_cart = function()
 		{
 			var price = false;
-			cbar_temp = cbar_Sizzle('');
+			cbar_temp = cbar_Sizzle('.product-line-actions .price .product-price > strong');
 			if(cbar_temp.length)
 			{
 				price_tmp = cbar_temp[0].innerHTML.match(/[0-9.,]+/);
@@ -596,7 +598,7 @@ if(cbar_home || cbar_pid || cbar_cid || cbar_search || cbar_brand || cbar_other 
 			cbar_pur_pids	= [];	//stores either product ids (recommended) or product names or products in cart
 			cbar_pur_qtys	= [];	//quantity of each product in cart
 		
-			var cbar_temp = cbar_Sizzle('');
+			var cbar_temp = cbar_Sizzle('.cart-items .cart-item .product-line-info > a');
 			for (var nodei=0; nodei < cbar_temp.length; nodei++)
 			{
 				pid_tmp = cbar_temp[nodei].href.match(/\/([^\/]*).html/);		
@@ -606,7 +608,7 @@ if(cbar_home || cbar_pid || cbar_cid || cbar_search || cbar_brand || cbar_other 
 				}
 			}
 			
-			var cbar_temp = cbar_Sizzle('');
+			var cbar_temp = cbar_Sizzle('.cart-items .cart-item .product-line-actions .input-group > input');
 			for (var nodei=0; nodei < cbar_temp.length; nodei++){
 				qty_tmp= cbar_temp[nodei].value;
 				
@@ -618,7 +620,7 @@ if(cbar_home || cbar_pid || cbar_cid || cbar_search || cbar_brand || cbar_other 
 
 
 // Shopping Cart scraping.
-if (cbar_url.toLowerCase().search('checkout/cart')>-1) {
+if (cbar_url.toLowerCase().search('/cart')>-1) {
 
 	//cbar_pur_mode	= 1;	//Turn this on when sending items list by product names, instead of product ids (recommended)
 
@@ -631,7 +633,7 @@ if (cbar_url.toLowerCase().search('checkout/cart')>-1) {
 	
 	
 	
-	var cbar_temp = cbar_Sizzle('');
+	var cbar_temp = cbar_Sizzle('.cart-items .cart-item .product-line-info > a');
 	for (var nodei=0; nodei < cbar_temp.length; nodei++)
 	{
 		pid_tmp = cbar_temp[nodei].href.match(/\/([^\/]*).html/);		
@@ -641,7 +643,7 @@ if (cbar_url.toLowerCase().search('checkout/cart')>-1) {
 		}
 	}
 	
-	var cbar_temp = cbar_Sizzle('');
+	var cbar_temp = cbar_Sizzle('.cart-items .cart-item .product-line-actions .input-group > input');
 	for (var nodei=0; nodei < cbar_temp.length; nodei++){
 		qty_tmp= cbar_temp[nodei].value;
 		
@@ -732,16 +734,16 @@ cbar_after_cou_inj = function (input){
 
 
 // Scrape email inputs. We scrape all the possible email inputs as an array from checkout, login or register pages
-if(cbar_url.toLowerCase().search('onestepcheckout') > -1) { 
+if(cbar_url.toLowerCase().search('/order') > -1) { 
 	
-	cbar_e_input= cbar_Sizzle ("");
+	cbar_e_input= cbar_Sizzle ("#customer-form ");
 	cbar_e_com=true;	
 	
 } //end email
 
 
 // Thank You Page scraping. (possible only after purchase is made)
-if  (cbar_url.search('checkout/onepage/success')>-1) {  
+if  (cbar_url.search('/order-confirmation')>-1) {  
 	
 	cbar_is_pur		= 1;			
 	cbar_pur_com	= true;	//actual buy took place
