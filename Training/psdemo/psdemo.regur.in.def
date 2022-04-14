@@ -110,7 +110,7 @@ subdomains like music.fnac.es and books.fnac.es. (if there is 1
 subdomain which doesnt change its ok (for example www.fnac.es)
 */
 
-cbar_cookiedomain	= '.psdemo.regur.in/';	//replace  domain.com with actual site domain	
+cbar_cookiedomain	= '.psdemo.regur.in';	//replace  domain.com with actual site domain	
 //if (cbar_url.search('.yahoo.net')>-1) cbar_cookiedomain = '.yahoo.net';
 
 //handle any test environmnets. we don't want to save any test env urls.
@@ -378,11 +378,22 @@ if (document.location.pathname=='/') cbar_home=true;
 	
 	
 // Category page scraping . Scrape for cid and cname(optional)
-cbar_temp = cbar_Sizzle ('body ul li.category'); 
-if (cbar_temp.length >0) {    
+cbar_temp = cbar_Sizzle ('body#category'); 
+if (cbar_temp.length >0) {
+	cbar_temp = cbar_Sizzle('span[itemprop="name"]');
+	if (cbar_temp.length == 3) {
+		cbar_cid_temp = cbar_temp[1].innerText.toLowerCase();
+		cbar_cid = cbar_temp[2].innerText.replace(/^\s+|\s/, "_").toLowerCase();
+		cbar_cid = cbar_cid_temp + "_" + cbar_cid;
+	  } else if (cbar_temp.length == 2) {
+		cbar_cid = cbar_temp[1].innerText.toLowerCase();
+		if (cbar_cid == "") {
+		  cbar_cid = cbar_temp[0].innerText.toLowerCase();
+		}
+	  }    
 	
 	// Important: when taking cids from URL its recommended to use document.location.pathname instead of cbar_url to reduce junk categories
-	// eg. document.location.pathname.replace(/^\//,""); //eg output: "audio-mp3/apple-ipod"
+	// eg. document.locatio1n.pathname.replace(/^\//,""); //eg output: "audio-mp3/apple-ipod"
 	// Junk categories generated due to query string variables, paging variables etc. must be stopped.
 	
 	cbar_cid	= "";
@@ -404,7 +415,7 @@ if (cbar_temp.length >0) {
 
 
 // Product page scraping
-cbar_temp = cbar_Sizzle ('body #product');
+cbar_temp = cbar_Sizzle ('body#product');
 if (cbar_temp.length>0){
 	
 	// Cbar Pid. scrapped generally from URL. Please make sure PIDs are always lowerCased if they are alpha-numeric
@@ -585,8 +596,7 @@ if(cbar_home || cbar_pid || cbar_cid || cbar_search || cbar_brand || cbar_other 
 			if(cbar_temp.length)
 			{
 				price_tmp = cbar_temp[0].innerHTML.match(/[0-9.,]+/);
-				if(price_tmp != null && price_tmp.length > 0)
-				{
+				if(price_tmp != null && price_tmp.length > 0){
 					price = price_tmp[0];
 				}
 			}	
@@ -595,9 +605,10 @@ if(cbar_home || cbar_pid || cbar_cid || cbar_search || cbar_brand || cbar_other 
 			
 		cbar_scrape_ajax_cart = function()
 		{		
+			cbar_pur_add=true;
 			cbar_pur_pids	= [];	//stores either product ids (recommended) or product names or products in cart
 			cbar_pur_qtys	= [];	//quantity of each product in cart
-		
+
 			var cbar_temp = cbar_Sizzle('.cart-items .cart-item .product-line-info > a');
 			for (var nodei=0; nodei < cbar_temp.length; nodei++)
 			{
@@ -625,19 +636,22 @@ if (cbar_url.toLowerCase().search('/cart')>-1) {
 	//cbar_pur_mode	= 1;	//Turn this on when sending items list by product names, instead of product ids (recommended)
 
 	cbar_is_pur		= 1;
+	cbar_pur_add=true;
 	
 	//cbar_crtn 		= 0;	//the number of different items in the cart and not their quantities.
 	
 	cbar_pur_pids	= [];	//stores either product ids (recommended) or product names or products in cart
-	cbar_pur_qtys	= [];	//quantity of each product in cart
-	
-	
+	cbar_pur_qtys	= [];	//quantity of each product in cart	
 	
 	var cbar_temp = cbar_Sizzle('.cart-items .cart-item .product-line-info > a');
+	
 	for (var nodei=0; nodei < cbar_temp.length; nodei++)
 	{
-		pid_tmp = cbar_temp[nodei].href.match(/\/([^\/]*).html/);		
-		if(pid_tmp != null && pid_tmp.length > 1)
+		pid_tmp = cbar_temp[nodei].href.match(/\/([^\/]*).html/);
+		var ppid = pid_tmp[4];
+		ppid = ppdi.split(".");
+		 var pid = p[0].split("-")	
+		if(pid != null && pid.length > 0)
 		{
 			cbar_pur_pids.push(pid_tmp[1].toLowerCase());	//push product id/name. Make sure PIDs are lowerCased if they are alpha-numeric			
 		}
@@ -711,8 +725,7 @@ cbar_before_cou_inj = function (input){
  */
    
 cbar_after_cou_inj = function (input){	
-	
-	window.onbeforeunload=null;  // prevent leaving page events by the coupon apply page refresh (use only when coupon refreshes page)
+	window.onbeforeunload = null; // prevent leaving page events by the coupon apply page refresh (use only when coupon refreshes page)
 	
 	/*
 		
@@ -734,12 +747,33 @@ cbar_after_cou_inj = function (input){
 
 
 // Scrape email inputs. We scrape all the possible email inputs as an array from checkout, login or register pages
-if(cbar_url.toLowerCase().search('/order') > -1) { 
-	
-	cbar_e_input= cbar_Sizzle ("#customer-form ");
-	cbar_e_com=true;	
-	
-} //end email
+if (cbar_url.toLowerCase().search("/login?") > -1) {
+	cbar_e_input = cbar_Sizzle("#login-form input[ name = 'email']");
+	cbar_e_com = true;
+  } 
+
+if (cbar_url.toLowerCase().search("/create_account") > -1) {
+	cbar_e_input = cbar_Sizzle("#customer-form input[ name = 'email']");
+	cbar_e_com = true;
+  }
+
+  if(cbar_url.toLowerCase().search("/order") > -1) {
+	cbar_e_input= cbar_Sizzle ("#customer-form input[ name = 'email']");
+	cbar_e_com=true;
+}
+  
+  if (cbar_url.toLowerCase().search("/contact-us") > -1) {
+	cbar_e_input = cbar_Sizzle(".form-control[ name = 'from']");
+	cbar_e_com = true;
+  }
+  
+  cbar_temp_email = cbar_Sizzle("#footer input[type=email]");
+  if (cbar_temp_email.length > 0) {
+	cbar_e_input.push(cbar_temp_email[0]);
+	cbar_e_com = true;
+  }
+
+//end email
 
 
 // Thank You Page scraping. (possible only after purchase is made)
