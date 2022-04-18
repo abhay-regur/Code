@@ -483,7 +483,7 @@ if (cbar_temp.length>0){
 	}
 		 
 	//Product Price
-	cbar_temp = cbar_Sizzle('span[id^="product-price"] span.price');
+	cbar_temp = cbar_Sizzle('');
 	if (cbar_temp.length>0){ 
 	
 		cbar_pri = cbar_temp[0].innerHTML.replace(/^\s+|\s+$/g,""); // trim white spaces, also remove comma from price if present
