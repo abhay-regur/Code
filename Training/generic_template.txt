@@ -1,0 +1,966 @@
+/*startearly_code-->
+
+//You define a function called cbar_hold_execution. if it returns false the code runs as usual. 
+//if it returns true the code wont run and the function is called repeatedly until the conditions to continue running.
+	
+cbar_startearly = true;
+	
+var cbar_max_wait = 0;
+
+	
+cbar_hold_execution= function (){
+	
+	
+	 cbar_max_wait++;   
+    if (cbar_max_wait > 20) return false;    
+    if (typeof (jQuery) == "undefined") return true;
+	
+    // wait for coupon box example
+	//
+    //		if (window.location.href.search('checkout/shopping-bag.htm') >-1){
+    //  		  cbar_temp =cbar_Sizzle ('input#bcode');
+    //  		  if (cbar_temp.length ==0) return true; // wait 
+    //		}
+    //
+	
+	
+       
+    return false;
+}
+
+<--startearly_code*/			  
+
+
+/*
+Description:		A generic DEF template file covering all common scraping commands, techniques and widgets
+Online Reference:	Refer to the online google document for the in depth documentation about the def file
+Last Updated: 		6 January,2020 
+Updated By:			Dharti
+Changes:			Updated cbar_before_cou_inj function.
+				
+*/
+
+
+
+
+
+/**
+ *   !! Important !!
+ *   
+ *     
+ *   1. jQuery Vs. cbar_Sizzle.
+ * 
+ *   jQuery is more preferable way to select elements, traverse DOM and trigger events
+ *   compared to cbar_Sizzle as it is a more robust library and browser compatible
+ *   Hence if the target site has jQuery available use it instead of cbar_Sizzle.
+ *   
+ *   While using jQuery make sure you check for *null* if you are directly accessing the
+ *   attribute/property of an element. jQuery will return *null* if desired element is not
+ *   found on the page and you are trying to directly access property of non-existing 
+ *   element. 
+ *   
+ *   eg. var cbar_temp = jQuery("#non_existing_element").html(); //will return null    
+ *   
+ *   2. Remove all instructional default/template comments like these before deploying to
+ *   keep file size & download size minimum.     
+ *  
+ *
+ * */ 
+
+cbar_sid 			= 0; 		//determine the SID using QWERTY format using first 5 chars of the domain name
+cbar_widget_show	= false;	//turn this on (set to true) only when ready for production, otherwise use widget_show=true as URL parameter to view the widgets in test mode
+cbar_widget 		= false;	//required for widgets
+cbar_num_widgets	= 1			//Set number of widgets in a page
+cbar_enabled 		= false;	// !! warning !!Set this value to false during the setup process. Remove this line OR set the value true when the code is ready to deploy on live site.
+
+
+//cbar_catmode 		= 2;		//not required in new scraping mode.
+cbar_encode 		= '';		//set according to the encoding of the website. eg utf-8
+
+// General associating variables
+var cbar_temp		= '';
+var cbar_temp2 		= '';
+var cbar_match		= '';
+var cbar_pattern 	= '';
+var cbar_arr 		= '';
+cbar_c_from_p		= true;
+
+
+
+//Uncomment to log the def file calls.
+//cbar_datajs='log_data_live.js.php';
+
+//Dealing with multiple site domains
+
+/*
+In some cases (such as with Yahoo and Netsuite stores for example),
+the checkout domian is different from the regular domain. In such
+sites, 2 cookie sets are created (one for each domain) and we need to
+synchronize them
+*/
+
+//cbar_md=true;
+
+//if the site has multiple sub-domains set to true
+cbar_use_cookies = false;
+
+/*
+cbar_cookiedomain is only required if the site has changing
+subdomains like music.fnac.es and books.fnac.es. (if there is 1
+subdomain which doesnt change its ok (for example www.fnac.es)
+*/
+
+cbar_cookiedomain	= '.domain.com';	//replace  domain.com with actual site domain	
+//if (cbar_url.search('.yahoo.net')>-1) cbar_cookiedomain = '.yahoo.net';
+
+//handle any test environmnets. we don't want to save any test env urls.
+if (window.location.href.match(/(:\/\/[0-9.]+)\//) !=null) cbar_ro=1;
+if (window.location.href.search('localhost') >-1 ) cbar_ro=1;
+
+//handle urls with google translation as read only
+
+if(cbar_url.toLowerCase().search('translate.googleusercontent.com')>-1) cbar_ro=true;
+
+//##replace it with actual domain name.
+
+var cbar_domain_name = cbar_cookiedomain.replace(".",""); 
+if(document.location.hostname.toLowerCase().search(cbar_domain_name) == -1) cbar_ro = true;
+
+
+// google translate
+
+//translated-ltr = Google Translate adds this class when Left To Right Language
+//translated-rtl = Google Translate adds this class when Right To Left Language
+
+var cbar_google_translated = cbar_Sizzle("html.translated-ltr, html.translated-rtl");
+if(cbar_google_translated.length > 0)
+{
+	cbar_ro = true;
+}
+
+
+// BEGIN SCRAPING & WIDGETS
+
+
+
+// Regex Template for matching strings in scrapped elements
+/* 
+cbar_pattern = /          /;
+cbar_match = cbar_pattern.exec(          );
+if (cbar_match!=null && cbar_match[1]!=null && cbar_match[1].length>-1)
+{
+
+}
+
+/^\s+|\s+$/g 		// regex pattern to trim spaces
+/<[^>]+>/gim			//regex pattern to trim html tags
+
+*/
+
+// Widget titles
+cbar_recstep_titles = []; // required temporarily
+cbar_recstep_titles[1]		= "Customers Who Viewed This Product Also Viewed";
+cbar_recstep_titles[2]		= "Top Sellers";
+cbar_recstep_titles[3]		= "Recently Viewed"
+cbar_recstep_titles[4]		= "Customers Who Bought This Product Also Bought";
+cbar_recstep_titles[5]		= "You Might Also Like";
+cbar_recstep_titles[6]		= "Recommended For You";
+cbar_recstep_titles[7]		= "Customers Who Bought This Product Also Bought";
+cbar_recstep_titles[8]		= "Top Sellers";
+cbar_recstep_titles[9]		= "Customers With Similar Searches Also Viewed";
+cbar_recstep_titles[10]		= "Customers Who Bought Products You Own Also Bought";
+cbar_recstep_titles[11]		= "Recommended For You";
+cbar_recstep_titles[12]		= "Top Sellers From Recent Categories You Visited";
+cbar_recstep_titles[13]		= "Recommendations Based On Your Google Search";
+cbar_recstep_titles[19]		= "What Other Customers Are Buying Right Now";
+cbar_recstep_titles[18]		= "What do customers ultimately buy after viewing this item?";
+cbar_recstep_titles[100]	= "You Might Also Like";
+
+/* !! flow comments !!
+ flow is valid if we have cid_p if we define linked cids in an array (like Fnac) instead of 4 we should use 5 and 
+ if we scrape only cid then it should be 2. This comment is for all occurences of "4" in the flow not only in P1	
+
+*/
+
+// determines the widget that are shown on the pages. Required for display of widgets. 
+//Can be different from site to site. Below cbar_flow displays "Recently Viewed" items in the widget.
+cbar_flow="H0:1,0,0,0,0;H1:1,0,0,0,0,0;P0:1,0,0,0,0;P1:1,0,0,0,0;C0:1,0,0,0,0;C1:1,0,0,0,0;Sc0:1,0,0,0,0;Sc1:1,0,0,0,0;S0:1,0,0,0,0;O0:1,0,0,0,0;"; 
+
+//standard flow
+//cbar_flow="H0:1-1,2-12,10.0.0.6.0.1,5.9.0.6,12.0.0.6,8;H1:1-1,4-15,0;P0:1-1,4-8,1,5.0.0.1,2.0.0.1,22.0.0.1;P1:1-1,4-12,4.4,4.2.0.0.0.0.2,1.4.0.5,1.2.0.5.0.0.3;C0:1-1,4-8,5.7,2.7,5.6,2.6,5.0,2.0;C1:1,0,0,0,0;Sc0:1-1,4-8,7.4,7.2.0.0.0.0.2,11.4,11.2.0.0.0.0.3;Sc1:1,0,0,0,0;S0:1,4-12,9,5.9;O0:1,4-8,5.9.0.0.6,12.0.0.6,8;";
+
+
+
+//New Mode: reset extra variables with a space to support new mode (in new mode , empty fields do not get updated)
+//cbar_extra1=" "; //deal with old price that has been removed
+//cbar_extra2 = " "; 	
+//cbar_extra3 = " "; 	
+
+
+
+/*
+Callback functions for widgets
+*/
+
+/*
+cbar_after_load: Is commonly used for altering results array. 
+Common alterations could be replacing the decimal symbols in currency, swapping large image paths with thumbimage paths stored in extra vars etc.
+*/
+
+ 
+cbar_after_load= function  (cbar_mode){
+
+	if ( cbar_mode == 'widget') {
+			for (var group_ctr=0; group_ctr <cbar_results.length; group_ctr++){
+	            for (var t=0; t < cbar_results[group_ctr].length ; t++){
+					
+					//decode extra vars
+					cbar_results[group_ctr][t][16] = decodeURIComponent(cbar_results[group_ctr][t][16]);
+					cbar_results[group_ctr][t][17] = decodeURIComponent(cbar_results[group_ctr][t][17]);
+					cbar_results[group_ctr][t][18] = decodeURIComponent(cbar_results[group_ctr][t][18]);
+					
+					//trim spaces in extra variables.
+					cbar_results[group_ctr][t][16] = cbar_results[group_ctr][t][16].replace(/^\s+|\s+$/g,'');
+					cbar_results[group_ctr][t][17] = cbar_results[group_ctr][t][17].replace(/^\s+|\s+$/g,'');
+					cbar_results[group_ctr][t][18] = cbar_results[group_ctr][t][18].replace(/^\s+|\s+$/g,'');
+					
+				
+					//Snippet: replace the . with comma in prices
+					/*
+					if (cbar_results[group_ctr][t][4] != "") {
+						cbar_results[group_ctr][t][4] = cbar_results[group_ctr][t][4].replace(".",",");                       
+					} 
+					if (cbar_results[group_ctr][t][16] != " ") {//if extra1 does not contain blank value
+						cbar_results[group_ctr][t][16] = cbar_results[group_ctr][t][16].replace(".",",");                       
+					}*/
+					
+					
+				}
+	        }
+		}
+	
+} // end
+
+/*
+cbar_after_show: Is called after widget is rendered & displayed on the browser. 
+Can be used to manipulate the display of widgets like turning on extra vars divs, turning off marigns from items based on position, hidding other/default site widgets,  etc.
+*/
+
+cbar_after_show= function  ( mode){
+	if (mode == 'widget') { 
+		for (var group_ctr=0; group_ctr <cbar_results.length; group_ctr++){
+		
+			for (var t=0; t < cbar_results[group_ctr].length ; t++)
+			{
+				
+				//display old price if any in extra1 var
+				if (cbar_results[group_ctr][t][16] != "") { //if extra1 is not empty
+					tmp = cbar_Sizzle('div#cbar_w'+ group_ctr +'_'+t+'_item_xtr1_s');					
+					if(tmp.length){
+						tmp[0].style.display="";
+					}
+				}
+				
+				/*
+				//enable the ultimately bought widget text:
+				if (cbar_results[group_ctr][t][19] >0) {
+					if (cbar_results[group_ctr][t][6] == cbar_pid) {// show ultimately bought current product						
+						tmp= document.getElementById("cbar_w"+group_ctr+"_"+t+"_item_perc_pur2_s");
+						if (tmp!=null) {
+							tmp.style.display='block';							
+							tmp.style.color="green";
+						}
+					}						
+					else {	// show ultimately bought not current product.					
+						tmp= document.getElementById("cbar_w"+group_ctr+"_"+t+"_item_perc_pur_s");
+						if (tmp!=null) tmp.style.display='block';						
+						}
+					} //end ultimately bought;
+					*/
+			}
+			
+			//hide default widget if any
+			if( cbar_widget_show == true)
+			{
+				// Hide widget1
+				tmp = cbar_Sizzle("");	
+				if(tmp.length>0 && group_ctr==0)
+				{
+					tmp[0].style.display="none";
+				}
+				
+				// Hide widget2
+				tmp = cbar_Sizzle("");	
+				if(tmp.length>0 && group_ctr==1)
+				{
+					tmp[0].style.display="none";
+				}
+			}
+		}
+	}
+} //end
+
+
+//Google analytics event tracking function. Called from widget items click event
+//link: reference to link element clicked.
+//category: always set to Barilliance.
+//action: can have following possible values: Home, Category, Product, Cart, Search or any other PageType
+//opt_label: title of the product clicked.
+//For usage see widget html templates.
+
+cbar_ga_eventtrack = function(link,category,action,opt_label){
+
+  if (typeof(ga) != 'undefined') {
+	  var tracker = ga.getAll()[0].get('name') + '.send';				
+	  ga(tracker,'event', category, action, opt_label);
+	  return;
+  }
+  
+   else if (typeof(_gaq) != 'undefined') {
+	  _gaq.push(['_trackEvent', category, action, opt_label]);
+	  return;
+  } 
+}  
+  
+// for responsive Widget
+elem=document.getElementById("cbar_mq_css");
+if(elem != null){
+	elem.parentNode.removeChild(elem);
+}
+
+cbar_mq_css = (function(id) {
+		
+		// Create the <style> tag				
+		var style = document.createElement("style");
+
+		// Add a media (and/or media query) here if you'd like!
+		// style.setAttribute("media", "screen")
+		//style.setAttribute("media", "@media only screen and (max-width : 1024px)")
+		
+		style.setAttribute('id',id);
+		//style.setAttribute("media", media_query)
+
+		// WebKit hack :(
+		style.appendChild(document.createTextNode(""));
+
+		// Add the <style> element to the page
+		document.head.appendChild(style);
+		
+		return style.sheet;
+		
+})('cbar_mq_css');	
+
+
+cbar_mq_addCSSRule = function(sheet, selector, rules, index) {
+	
+	try
+	{
+		if(sheet.insertRule) {
+			sheet.insertRule(selector + "{" + rules + "}", index);
+		}
+		else {
+			sheet.addRule(selector, rules, index);
+		}
+	}
+	catch(e)
+	{
+		if(window.console) console.log('Bari: Failed to add CSS');
+		//alert("Failed"+ e.message);
+	}
+}										  
+
+
+
+
+	
+// Home page scraping
+if (document.location.pathname=='/') cbar_home=true;
+	
+	
+// Category page scraping . Scrape for cid and cname(optional)
+cbar_temp = cbar_Sizzle (''); 
+if (cbar_temp.length >0) {    
+	
+	// Important: when taking cids from URL its recommended to use document.location.pathname instead of cbar_url to reduce junk categories
+	// eg. document.location.pathname.replace(/^\//,""); //eg output: "audio-mp3/apple-ipod"
+	// Junk categories generated due to query string variables, paging variables etc. must be stopped.
+	
+	cbar_cid	= "";
+	cbar_cname	= "";	//optional
+	
+  
+  //.. make sure to set cbar_ro=1 for virtual categories such as best seller, new products, brand etc
+
+  	// ###### important: Assign full path to cid where there are chances of categories like (Womens >> Shoes & Mens >> Shoes), here "Shoes" is ambiguous if not assigned the full path
+	if(cbar_cids_p!="" && cbar_cid !=""){
+		cbar_cid = cbar_cids_p +"_"+ cbar_cid;		
+	}	
+	
+	
+	cbar_cid = cbar_cid.toLowerCase();	//make sure alpha-numeric CIDs are always lowerCased
+	cbar_cids_p = "";
+
+ }
+
+
+// Product page scraping
+cbar_temp = cbar_Sizzle ('');
+if (cbar_temp.length>0){
+	
+	// Cbar Pid. scrapped generally from URL. Please make sure PIDs are always lowerCased if they are alpha-numeric
+	cbar_pattern = /\/([^\/]+)\.html/gim;
+	cbar_match= cbar_pattern.exec(document.location.pathname);	//or cbar_gup(urlParameterName)
+	if (cbar_match != null && cbar_match.length > 1)
+	{
+		cbar_pid = cbar_match[1].toLowerCase();
+	}
+	
+	if (cbar_pid.search('tel:') >-1) { // on Ipad/iphone a number is turned into <a href="tel:1102373">1102373</a>
+		cbar_pattern = /([0-9]+)/gim; 
+		cbar_match= cbar_pattern.exec(cbar_pid); 
+		if (cbar_match!=null && cbar_match[1].length>0) cbar_pid= cbar_match[1]; 
+	}
+	
+	//name	
+	cbar_temp = cbar_Sizzle('');
+	if (cbar_temp.length>0) 
+		cbar_name = cbar_temp[0].innerHTML;
+	
+	
+	//purl. (query parameters required for loading correct product page must be tested and included in the url, by default no parameters are included) 
+	var tmp = window.location.href.split("?");
+	cbar_purl = tmp[0];
+	
+	
+	
+	// Cbar cid and parent category
+	cbar_temp= cbar_Sizzle ('');	
+	if (cbar_temp.length>0)
+	{ 
+		
+		// Important: when taking cids from URL its recommended to use document.location.pathname instead of cbar_url to reduce junk categories
+		// eg. document.location.pathname.replace(/^\//,""); //eg output: "audio-mp3/apple-ipod"
+		// Junk categories generated due to query string variables, paging variables etc. must be stopped.
+		
+		cbar_cid 	= "";	//category id
+		cbar_cname	= "";	//optional		
+		cbar_cids_p	= "";	//parent category id		
+	}	
+	
+	
+	//Lower case CIDs and Parent CIDs
+	if(cbar_cid!="") cbar_cid = cbar_cid.toLowerCase();
+	if(cbar_cids_p!="") cbar_cids_p = cbar_cids_p.toLowerCase();
+	
+	// ###### important: Assign full path to cid where there are chances of categories like (Womens >> Shoes & Mens >> Shoes), here "Shoes" is ambiguous if not assigned the full path
+	
+	
+	if(cbar_cids_p!="" && cbar_cid !=""){
+		cbar_cid = cbar_cids_p +"_"+ cbar_cid;	//## also match on category pages.
+	}
+	
+	
+	
+	if (cbar_cids_p!='') cbar_cids_cur=cbar_cid; // make sure the product cid doesnt change on server side when storing parent category.
+	
+
+	//out of stock. 
+	cbar_temp= cbar_Sizzle ('');
+	if (cbar_temp.length>0 && cbar_temp[0].innerHTML.toLowerCase() == "this product is currently out of stock."){
+		cbar_oos = 1;
+	}
+	
+			
+	//Product image
+	// Important: Always scrape medium or large size images for product image. If you need to scrape thumbnail images (for example to display in the widget) scrape it in extra variables explained below
+	var cbar_temp = cbar_Sizzle(''); //generally from main image tag
+	if (cbar_temp.length>0) {
+		
+		cbar_pic = cbar_temp[0].src;	
+		if(cbar_pic.search('localhost')>-1) cbar_pic = '';
+		if(cbar_pic.search(/[0-9]\/bmi\//)>-1) cbar_pic = '';	//ignore dev server image urls.		
+		
+	}
+		 
+	//Product Price
+	cbar_temp = cbar_Sizzle('span[id^="product-price"] span.price');
+	if (cbar_temp.length>0){ 
+	
+		cbar_pri = cbar_temp[0].innerHTML.replace(/^\s+|\s+$/g,""); // trim white spaces, also remove comma from price if present
+		
+		// Set read only if the currency is not correct or if the site has multi currency, set read only except for default currency.		
+		// Replace the unicode(\u20AC for €) of currency symbol based on site's default currency. To find the unicode of currency symbol 
+		// please visit this link https://www.fileformat.info/info/unicode/category/Sc/list.htm 	
+		if(cbar_pri.search(/\u20AC/) == -1)
+		{
+			cbar_ro = true;
+		}	
+	}
+	
+	
+	//out of stock pages..(this is different from out of stock (cbar_oos) where product info is available but the product is out of stock, here no product info is available similar to 404)
+	cbar_temp = cbar_Sizzle('');
+	if (cbar_temp.length>0) {
+			cbar_oos_page=1;
+			cbar_ctr1=1;
+	}
+
+	
+	// Optional elements to scrape..
+	
+	// old price  or list price(if any), scrape into cbar_extra1
+	/*
+	var cbar_temp= cbar_Sizzle('');
+	if (cbar_temp.length>0) {
+		cbar_extra1=cbar_temp[0].innerHTML.replace(/^\s+|\s+$/g,""); //trim
+	}
+	*/
+	
+	//Product ratings (image) if any. scrape into cbar_extra2
+	/*
+	cbar_temp = cbar_Sizzle("p.product-ids + img");
+	if(cbar_temp.length>0){
+		cbar_extra2 = cbar_temp[0].src;
+	}
+	
+	//Similariy, cbar_extra3 can be used for any other extra value you have scrapped like above
+	
+	*/
+	
+	//Brand or manufacturer if any. scrape into cbar_filter_val (optional)
+	var cbar_temp= cbar_Sizzle('');
+	if(cbar_temp.length>0){		
+		cbar_filter_val	= "";	
+	}
+
+	
+	/*
+	//show ultimately bought on second page view	
+	if (cbar_readCookie (cbar_pid) == null )
+		cbar_createCookie(cbar_pid,'true');
+	else {
+		
+		//cbar flow to display the ultimately bought widget; Note if the widget doesnot appear try changing 50 value in the below flow to some lower value eg 1 in the P0 or P1 section of the flow				
+		cbar_flow="H0:0,5,13,11,5.9,12,8;H1:0,0,0,0,0;P0:0,2,13,18.0.0.0.0.0.0.50,1.0.2,5,1.2,2;P1:0,3,1.2.1.14,5.2,6,2;C0:1,3,13,5.0,2;C1:0,0,0,0,0;Sc0:1,2,7.2.1.0.0.0.5,11.2,17,3;Sc1:1,0,0,0,0;OOS0:1,1,1.0.0.0.0.100";	
+		
+		OR (another example, if you want ultimately bought on the second widget. also if featured item is not appearing as the first item try (18.0.0.0.0.0.0.50)
+		
+		cbar_flow="H0:1,3,13,11,5.9,12,8;H1:1,0,0,0,0;P0:1,3,13,1.4.0.7,1,5,2;P1:1,3,18.0.0.0.0.0.0.50,2.0;C0:1,2,13,5.0,2.0;C1:1,1,2.6;Sc0:1,2,7.4.0.100,11.4.0.100;Sc1:1,0,0,0,0";
+		
+		cbar_ctr2=1;
+	}	//end ultimately bought
+	*/
+	
+
+	
+}	//end product page	
+
+
+	
+//Search page scraping
+if ((cbar_url.toLowerCase().search('catalogsearch/result')>-1) && (cbar_url.toLowerCase().search('q=')> -1)){
+
+	cbar_search=cbar_gup('q');	//scrape the search keyword. generally from url parameter
+}
+
+
+// Ajax cart ... we will execute ajax cart only on barilliance known page types to avoid the cart reset issues
+// Make sure this blocks remains after all page type detection is done
+if(cbar_home || cbar_pid || cbar_cid || cbar_search || cbar_brand || cbar_other || cbar_4U)
+{
+		cbar_check_cart = function()
+		{
+			var price = false;
+			cbar_temp = cbar_Sizzle('');
+			if(cbar_temp.length)
+			{
+				price_tmp = cbar_temp[0].innerHTML.match(/[0-9.,]+/);
+				if(price_tmp != null && price_tmp.length > 0)
+				{
+					price = price_tmp[0];
+				}
+			}	
+			return price;
+		}
+			
+		cbar_scrape_ajax_cart = function()
+		{		
+			cbar_pur_pids	= [];	//stores either product ids (recommended) or product names or products in cart
+			cbar_pur_qtys	= [];	//quantity of each product in cart
+		
+			var cbar_temp = cbar_Sizzle('');
+			for (var nodei=0; nodei < cbar_temp.length; nodei++)
+			{
+				pid_tmp = cbar_temp[nodei].href.match(/\/([^\/]*).html/);		
+				if(pid_tmp != null && pid_tmp.length > 1)
+				{
+					cbar_pur_pids.push(pid_tmp[1].toLowerCase());	//push product id/name. Make sure PIDs are lowerCased if they are alpha-numeric			
+				}
+			}
+			
+			var cbar_temp = cbar_Sizzle('');
+			for (var nodei=0; nodei < cbar_temp.length; nodei++){
+				qty_tmp= cbar_temp[nodei].value;
+				
+				cbar_pur_qtys.push(qty_tmp);	//push product qty
+					
+			}				
+		}
+}
+
+
+// Shopping Cart scraping.
+if (cbar_url.toLowerCase().search('checkout/cart')>-1) {
+
+	//cbar_pur_mode	= 1;	//Turn this on when sending items list by product names, instead of product ids (recommended)
+
+	cbar_is_pur		= 1;
+	
+	//cbar_crtn 		= 0;	//the number of different items in the cart and not their quantities.
+	
+	cbar_pur_pids	= [];	//stores either product ids (recommended) or product names or products in cart
+	cbar_pur_qtys	= [];	//quantity of each product in cart
+	
+	
+	
+	var cbar_temp = cbar_Sizzle('');
+	for (var nodei=0; nodei < cbar_temp.length; nodei++)
+	{
+		pid_tmp = cbar_temp[nodei].href.match(/\/([^\/]*).html/);		
+		if(pid_tmp != null && pid_tmp.length > 1)
+		{
+			cbar_pur_pids.push(pid_tmp[1].toLowerCase());	//push product id/name. Make sure PIDs are lowerCased if they are alpha-numeric			
+		}
+	}
+	
+	var cbar_temp = cbar_Sizzle('');
+	for (var nodei=0; nodei < cbar_temp.length; nodei++){
+		qty_tmp= cbar_temp[nodei].value;
+		
+		cbar_pur_qtys.push(qty_tmp);	//push product qty
+			
+	}
+	
+	//Scrape the cart total
+	
+	// !!!! Important: if cbar_crt is scraped make sure to scrape cbar_crtn & vice-versa !!!!
+	
+	/*cbar_temp = cbar_Sizzle('');	
+	if (cbar_temp.length>0){
+		cbar_crt = cbar_temp[0].innerHTML.replace(",",'');
+	}*/	
+	
+	//coupon code handling...
+	cbar_temp =cbar_Sizzle ('input[name="coupon_code"]');
+	if (cbar_temp.length>0){
+		cbar_cou_input= cbar_temp[0];
+	}
+	
+}	//end shopping cart	
+
+
+//coupon code callbacks
+
+
+cbar_before_cou_inj = function (input){
+	
+	//If you want to perform any action before applying coupon like open the toggle panel you can write here.  
+     
+   
+	//BELOW CODE ONLY USE WHEN THERE IS PAGE REFRESH IN COUPON SUBMISSION
+	
+    /* 
+	
+		//to avoid infinite loop when injecting coupon causes page refresh	
+	
+		var coupon_injected = cbar_readCookie('cbar_cou_inj' );
+		if ( (coupon_injected==null) || (coupon_injected=="false") ) { 
+			cbar_createCookie('cbar_cou_inj',true );
+			return true;
+		}
+		else {
+			cbar_createCookie('cbar_cou_inj',false );
+			return false; // don't inject
+		} 
+	
+	*/
+
+}
+
+
+/**
+ *   use jQuery to trigger click events of button of form submission if
+ *   jQuery is available on the target site. Incase jQuery isn't available
+ *   implement a cut down version of the following code:
+ *   http://stackoverflow.com/questions/6157929/how-to-simulate-mouse-click-using-javascript/6158050#6158050
+ *   
+ *   to trigger events across all browsers.
+ *   (Ref: ticket-1180 comment 5)  
+ *      
+ *
+ */
+   
+cbar_after_cou_inj = function (input){	
+	
+	window.onbeforeunload=null;  // prevent leaving page events by the coupon apply page refresh (use only when coupon refreshes page)
+	
+	/*
+		
+	tmp = cbar_Sizzle('form[name="codigodescuento"]');
+	if(tmp.length>0){		
+		tmp[0].submit();
+	}
+	
+	*/
+	
+	// @@ Imp 
+	// If using the the click event of button to submit the coupon its recommended to use jQuery to trigger the click.
+	// jQuery("#coupon_button").trigger('click');	
+	// If jQuery is not available see the comment above this function.
+		
+		
+}	
+//end coupon code callbacks
+
+
+// Scrape email inputs. We scrape all the possible email inputs as an array from checkout, login or register pages
+if(cbar_url.toLowerCase().search('onestepcheckout') > -1) { 
+	
+	cbar_e_input= cbar_Sizzle ("");
+	cbar_e_com=true;	
+	
+} //end email
+
+
+// Thank You Page scraping. (possible only after purchase is made)
+if  (cbar_url.search('checkout/onepage/success')>-1) {  
+	
+	cbar_is_pur		= 1;			
+	cbar_pur_com	= true;	//actual buy took place
+	
+} // end thank you
+
+
+// Widgets Begin
+
+//common widget variables
+cbar_w_title_len	= 50;	//max length of product titles displayed on widget.
+
+
+//for multiline widgets use:
+//cbar_w_linebreak_template[0]='<br style="clear:both"/>';
+//cbar_w_iconsperline[0]=4;
+
+//example  Home Page Widget (simple widget)
+
+/*
+* NOTE:
+* There can be more than 1 widget on one page (max 2). For second widget simply replace the  '0' with '1' in 
+* all the widget variables and array.
+*
+ */
+
+if (cbar_home){	
+	
+	//Scrape anchor element, around which the widget displays itself on the page
+	cbar_temp = cbar_Sizzle('');
+	if (cbar_temp.length>0){
+		cbar_w_anchor[0]=cbar_temp[0];
+	}
+	
+	
+
+	cbar_w_numshowicons[0] = 3; //number items shown in the widget
+	cbar_w_insert_where[0] = 0;	//determines the position of widget with reference to anchor element possible values 0 = after the anchor, 1= before the anchor, 2= inside the anchor	
+	
+	// styles
+	cbar_w0_wrap_s				= '';
+	cbar_w0_header_s			= '';
+	cbar_w0_items_s				= '';
+	cbar_w0_item_s				= '';
+	cbar_w0_item_a_s			= '';
+	cbar_w0_item_img_s			= '';
+	cbar_w0_item_perc_pur_s		= '';
+	cbar_w0_item_perc_pur2_s	= '';
+	cbar_w0_item_title_s		= '';
+	cbar_w0_item_xtr1_s			= '';
+	cbar_w0_item_xtr1_in_s		= '';
+	cbar_w0_item_price_s		= '';
+	cbar_w0_item_price_in_s		= '';
+	cbar_w0_item_xtr2_s			= '';
+	cbar_w0_item_xtr2_in_s		= '';
+	cbar_w0_item_xtr3_s			= '';
+	cbar_w0_item_xtr3_in_s		= '';
+
+	// html   	
+	//widget head
+	cbar_w_template_head[0]='<div  id="cbar_widget0" class="bari-widget bari-widget-h" style="'+cbar_w0_wrap_s+'"><div id="cbar_w0_header_s" style="'+cbar_w0_header_s+'">%group_title%</div>'+
+	'<div id="cbar_w0_items_s" style="'+cbar_w0_items_s+'">';
+    
+	//widget items
+	cbar_w_item_template[0]='<div id="cbar_w0_%t%_item_s" style="'+cbar_w0_item_s+'">'+
+	        '<a id="cbar_w0_%t%_item_a_s" style="'+cbar_w0_item_a_s+'"  onclick="cbar_ga_eventtrack(this, \'Barilliance\', \'Home\', \'%title%\'); return cbar_click3(this, \'%url%\', %rectype%, %idx%,\'%pid%\');" href="%url%">'+
+	        '<img id="cbar_w0_%t%_item_img_s" style="'+cbar_w0_item_img_s+'"  src="%picture%">'+
+			'%live_notifications%'+
+	        '<div  id="cbar_w0_%t%_item_perc_pur_s"  style="display:none; '+cbar_w0_item_perc_pur_s+'">%perc_purchased%% buy:</div>'+ // % purchased this item
+	        '<div  id="cbar_w0_%t%_item_perc_pur2_s"  style="display:none; '+cbar_w0_item_perc_pur2_s+'">%perc_purchased%% buy the item featured on this page:</div>'+ // % purchased item on this page
+	        '<div  id="cbar_w0_%t%_item_title_s"  style="'+cbar_w0_item_title_s+'">%title%</div></a>'+
+	        '<div  id="cbar_w0_%t%_item_xtr1_s"  style="display:none; '+cbar_w0_item_xtr1_s+'">Regular price: <span id="cbar_w0_%t%_item_xtr1_in_s" style="'+cbar_w0_item_xtr1_in_s+'">%xtr1%</span></div>'+
+	        '<div  id="cbar_w0_%t%_item_price_s"  class= "relatedprice" style="'+cbar_w0_item_price_s+'"><span id="cbar_w0_%t%_item_price_in_s" style="'+cbar_w0_item_price_in_s+'">%price%</span></div>'+
+	        '<div  id="cbar_w0_%t%_item_xtr2_s"  style=" display:none;'+cbar_w0_item_xtr2_s+'">:<span id="cbar_w0_%t%_item_xtr2_in_s" style="'+cbar_w0_item_xtr2_in_s+'">%xtr2%</span></div>'+
+	        '<div  id="cbar_w0_%t%_item_xtr3_s"  style="display:none; '+cbar_w0_item_xtr3_s+'">:<span id="cbar_w0_%t%_item_xtr3_in_s"  style="'+cbar_w0_item_xtr3_in_s+'">%xtr3%</span></div>'+'</div>';
+
+	//widget footer
+	cbar_w_template_bottom[0]='</div></div>';
+}
+
+
+
+// Product Page Widget  (exmaple of scrolling widget)
+
+if (cbar_pid && !cbar_oos_page)
+{
+	//Scrape anchor element, around which the widget displays itself on the page
+	cbar_temp = cbar_Sizzle('');
+	if (cbar_temp.length>0){
+		cbar_w_anchor[0]=cbar_temp[0];
+	}
+	
+	cbar_w_insert_where[0] 	= 0; 	//determines the position of widget with reference to anchor element possible values 0 = after the anchor, 1= before the anchor, 2= inside the anchor
+	
+	cbar_w_numshowicons[0] 	= 3; 	//number of items displayed in the scroll at a time
+	cbar_numicons1		 	= 8; 	//tells how many items are actually in the widget	(for first scrolling widget you suffix the the variable with 1, for second widget, suffix with 2)	
+	cbar_w_scrollbuttons	= true;	//scrolling widget.
+	
+	
+	// styles
+	cbar_w0_wrap_s				= '';
+	cbar_w0_header_s			= '';
+	cbar_w0_items_s				= '';
+	cbar_w0_item_s				= '';
+	cbar_w0_item_a_s			= '';
+	cbar_w0_item_img_s			= '';
+	cbar_w0_item_perc_pur_s		= '';
+	cbar_w0_item_perc_pur2_s	= '';
+	cbar_w0_item_title_s		= '';
+	cbar_w0_item_xtr1_s			= '';
+	cbar_w0_item_xtr1_in_s		= '';
+	cbar_w0_item_price_s		= '';
+	cbar_w0_item_price_in_s		= '';
+	cbar_w0_item_xtr2_s			= '';
+	cbar_w0_item_xtr2_in_s		= '';
+	cbar_w0_item_xtr3_s			= '';
+	cbar_w0_item_xtr3_in_s		= '';
+	
+	
+	//html	
+	//change the paths of arrows in below code
+	cbar_w_next_html='<a href="javascript:void(0)"><img style="float:left;width:42px; height:28px; margin-top:0px"  onclick="return cbar_w_next(%i%);" src="/docroot/css/immagini/carosello_freccia_dx.gif"></img></a>';
+	cbar_w_prev_html='<a href="javascript:void(0)"><img style="float:left;margin-top:0px"; onclick="return cbar_w_prev(%i%);" src="/docroot/css/immagini/carosello_freccia_sx.gif"></img></a>';
+
+	
+	//widget head
+	cbar_w_template_head[0]='<div  id="cbar_widget0" class="bari-widget bari-widget-p" style="'+cbar_w0_wrap_s+'"><div id="cbar_w0_header_s" style="'+cbar_w0_header_s+'">%group_title%</div>'+
+	'<div style="float:left;">%prevbutton%</div><div id="cbar_w0_items_s" style="'+cbar_w0_items_s+'">';
+
+	//widget items
+	cbar_w_item_template[0]='<div id="cbar_w0_%t%_item_s" style="'+cbar_w0_item_s+'">'+
+	        '<a id="cbar_w0_%t%_item_a_s" style="'+cbar_w0_item_a_s+'"  onclick="cbar_ga_eventtrack(this, \'Barilliance\', \'Product\', \'%title%\'); return cbar_click3(this, \'%url%\', %rectype%, %idx%,\'%pid%\');" href="%url%">'+
+	        '<img id="cbar_w0_%t%_item_img_s" style="'+cbar_w0_item_img_s+'"  src="%picture%">'+
+			'%live_notifications%'+
+	        '<div  id="cbar_w0_%t%_item_perc_pur_s"  style="display:none; '+cbar_w0_item_perc_pur_s+'">%perc_purchased%% buy:</div>'+ // % purchased this item
+	        '<div  id="cbar_w0_%t%_item_perc_pur2_s"  style="display:none; '+cbar_w0_item_perc_pur2_s+'">%perc_purchased%% buy the item featured on this page:</div>'+ // % purchased item on this page
+	        '<div  id="cbar_w0_%t%_item_title_s"  style="'+cbar_w0_item_title_s+'">%title%</div></a>'+
+	        '<div  id="cbar_w0_%t%_item_xtr1_s"  style="display:none; '+cbar_w0_item_xtr1_s+'">Regular price: <span id="cbar_w0_%t%_item_xtr1_in_s" style="'+cbar_w0_item_xtr1_in_s+'">%xtr1%</span></div>'+
+	        '<div  id="cbar_w0_%t%_item_price_s"  class= "relatedprice" style="'+cbar_w0_item_price_s+'"><span id="cbar_w0_%t%_item_price_in_s" style="'+cbar_w0_item_price_in_s+'">%price%</span></div>'+
+	        '<div  id="cbar_w0_%t%_item_xtr2_s"  style=" display:none;'+cbar_w0_item_xtr2_s+'">:<span id="cbar_w0_%t%_item_xtr2_in_s" style="'+cbar_w0_item_xtr2_in_s+'">%xtr2%</span></div>'+
+	        '<div  id="cbar_w0_%t%_item_xtr3_s"  style="display:none; '+cbar_w0_item_xtr3_s+'">:<span id="cbar_w0_%t%_item_xtr3_in_s"  style="'+cbar_w0_item_xtr3_in_s+'">%xtr3%</span></div>'+'</div>';
+	
+	//widget footer
+	cbar_w_template_bottom[0]='</div><div style="float:left;">%nextbutton%</div></div>';
+	
+	
+
+}//product page widget end
+
+
+// Shopping Cart Widget
+if (cbar_url.toLowerCase().search('checkout/cart')>-1) {
+
+		//Scrape anchor element, around which the widget displays itself on the page
+	cbar_temp = cbar_Sizzle('');
+	if (cbar_temp.length>0){
+		cbar_w_anchor[0]=cbar_temp[0];
+	}
+	
+	cbar_w_insert_where[0] 	= 0; 	//determines the position of widget with reference to anchor element possible values 0 = after the anchor, 1= before the anchor, 2= inside the anchor
+	
+	cbar_w_numshowicons[0] 	= 3; 	//number of items displayed in the scroll at a time
+	cbar_numicons1		 	= 8; 	//tells how many items are actually in the widget	(for first scrolling widget you suffix the the variable with 1, for second widget, suffix with 2)	
+	cbar_w_scrollbuttons	= true;	//scrolling widget.
+	
+	
+	// styles
+	cbar_w0_wrap_s				= '';
+	cbar_w0_header_s			= '';
+	cbar_w0_items_s				= '';
+	cbar_w0_item_s				= '';
+	cbar_w0_item_a_s			= '';
+	cbar_w0_item_img_s			= '';
+	cbar_w0_item_perc_pur_s		= '';
+	cbar_w0_item_perc_pur2_s	= '';
+	cbar_w0_item_title_s		= '';
+	cbar_w0_item_xtr1_s			= '';
+	cbar_w0_item_xtr1_in_s		= '';
+	cbar_w0_item_price_s		= '';
+	cbar_w0_item_price_in_s		= '';
+	cbar_w0_item_xtr2_s			= '';
+	cbar_w0_item_xtr2_in_s		= '';
+	cbar_w0_item_xtr3_s			= '';
+	cbar_w0_item_xtr3_in_s		= '';
+	
+	
+	//html	
+	//change the paths of arrows in below code
+	cbar_w_next_html='<a href="javascript:void(0)"><img style="float:left;width:42px; height:28px; margin-top:0px"  onclick="return cbar_w_next(%i%);" src="/docroot/css/immagini/carosello_freccia_dx.gif"></img></a>';
+	cbar_w_prev_html='<a href="javascript:void(0)"><img style="float:left;margin-top:0px"; onclick="return cbar_w_prev(%i%);" src="/docroot/css/immagini/carosello_freccia_sx.gif"></img></a>';
+
+	
+	//widget head
+	cbar_w_template_head[0]='<div  id="cbar_widget0" class="bari-widget bari-widget-sc" style="'+cbar_w0_wrap_s+'"><div id="cbar_w0_header_s" style="'+cbar_w0_header_s+'">%group_title%</div>'+
+	'<div style="float:left;">%prevbutton%</div><div id="cbar_w0_items_s" style="'+cbar_w0_items_s+'">';
+
+	//widget items
+	cbar_w_item_template[0]='<div id="cbar_w0_%t%_item_s" style="'+cbar_w0_item_s+'">'+
+	        '<a id="cbar_w0_%t%_item_a_s" style="'+cbar_w0_item_a_s+'"  onclick="cbar_ga_eventtrack(this, \'Barilliance\', \'Cart\', \'%title%\'); return cbar_click3(this, \'%url%\', %rectype%, %idx%,\'%pid%\');" href="%url%">'+
+	        '<img id="cbar_w0_%t%_item_img_s" style="'+cbar_w0_item_img_s+'"  src="%picture%">'+
+			'%live_notifications%'+
+	        '<div  id="cbar_w0_%t%_item_perc_pur_s"  style="display:none; '+cbar_w0_item_perc_pur_s+'">%perc_purchased%% buy:</div>'+ // % purchased this item
+	        '<div  id="cbar_w0_%t%_item_perc_pur2_s"  style="display:none; '+cbar_w0_item_perc_pur2_s+'">%perc_purchased%% buy the item featured on this page:</div>'+ // % purchased item on this page
+	        '<div  id="cbar_w0_%t%_item_title_s"  style="'+cbar_w0_item_title_s+'">%title%</div></a>'+
+	        '<div  id="cbar_w0_%t%_item_xtr1_s"  style="display:none; '+cbar_w0_item_xtr1_s+'">Regular price: <span id="cbar_w0_%t%_item_xtr1_in_s" style="'+cbar_w0_item_xtr1_in_s+'">%xtr1%</span></div>'+
+	        '<div  id="cbar_w0_%t%_item_price_s"  class= "relatedprice" style="'+cbar_w0_item_price_s+'"><span id="cbar_w0_%t%_item_price_in_s" style="'+cbar_w0_item_price_in_s+'">%price%</span></div>'+
+	        '<div  id="cbar_w0_%t%_item_xtr2_s"  style=" display:none;'+cbar_w0_item_xtr2_s+'">:<span id="cbar_w0_%t%_item_xtr2_in_s" style="'+cbar_w0_item_xtr2_in_s+'">%xtr2%</span></div>'+
+	        '<div  id="cbar_w0_%t%_item_xtr3_s"  style="display:none; '+cbar_w0_item_xtr3_s+'">:<span id="cbar_w0_%t%_item_xtr3_in_s"  style="'+cbar_w0_item_xtr3_in_s+'">%xtr3%</span></div>'+'</div>';
+	
+	//widget footer
+	cbar_w_template_bottom[0]='</div><div style="float:left;">%nextbutton%</div></div>';
+
+}//shopping cart widget end
+
+
+
+function cbar_check_ref(domain) { // example : xxxxxxxx.com    
+	var cbar_temp_ref = '';
+	var regex = /([^\?]*)/;
+	var result = regex.exec(document.referrer); // Remove parameters
+	if ( result!=null && result[1]!=null ) 
+		cbar_temp_ref = result[1];
+	else
+		cbar_temp_ref = document.referrer;
+	if (cbar_temp_ref.search(domain) == -1) {
+		cbar_ro=true;
+		return 1; // Didn't come from the domain
+	}
+	else return 0; // Came from the domain
+}
