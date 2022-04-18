@@ -507,7 +507,6 @@ if (cbar_temp.length > 0 && cbar_temp1.length > 0) {
 cbar_temp = cbar_Sizzle ('div[class^="productContainer-"] section[class^="cartActions-"]');
 if (cbar_temp.length>0){		
 			
-		
 		cbar_temp = cbar_Sizzle('div[class^="reviewsContainer-"][data-bv-product-id]');
 		if(cbar_temp.length) {
 			cbar_pid_temp = cbar_temp[0].getAttribute('data-bv-product-id');
@@ -540,7 +539,88 @@ if (cbar_temp.length>0){
                 }
             }
 		}
+
+
+	//******************************Abhay's Code Start
+	//Product Master ID cbar_masterid
+	cbar_temp = cbar_Sizzle('div[class^="reviewsContainer-"][data-bv-product-id]');
+	if(cbar_temp.length>0)
+		cbar_masterid = cbar_temp[0].getAttribute('data-bv-product-id').split(".")[0];
+
+
+	//name	
+	cbar_temp = cbar_Sizzle('section[class^="title-"] h1[class^="productName-"]');
+	if (cbar_temp.length>0) 
+		cbar_name = cbar_temp[0].innerHTML;
 		 
+
+
+	//purl. (query parameters required for loading correct product page must be tested and included in the url, by default no parameters are included) 
+	var tmp = window.location.href.split("?");
+	cbar_purl = tmp[0];
+	
+	
+	
+	// Cbar cid and parent category
+	cbar_temp= cbar_Sizzle ('');	
+	if (cbar_temp.length>0)
+	{
+		cbar_cid 	= "";	//category id
+		cbar_cname	= "";	//optional		
+		cbar_cids_p	= "";	//parent category id		
+	}	
+	
+	
+	//Lower case CIDs and Parent CIDs
+	if(cbar_cid!="") cbar_cid = cbar_cid.toLowerCase();
+	if(cbar_cids_p!="") cbar_cids_p = cbar_cids_p.toLowerCase();
+	
+
+	
+	if(cbar_cids_p!="" && cbar_cid !=""){
+		cbar_cid = cbar_cids_p +"_"+ cbar_cid;	//## also match on category pages.
+	}
+	
+	
+	
+	if (cbar_cids_p!='') cbar_cids_cur=cbar_cid; // make sure the product cid doesnt change on server side when storing parent category.
+	
+	//Product image
+	var cbar_temp = cbar_Sizzle('section[class^="imageCarousel-"] div[class^="desktopImageContainer"] img[class="iiz__img  "]'); //generally from main image tag
+	if (cbar_temp.length>0) {
+		
+		cbar_pic = cbar_temp[0].src;	
+		if(cbar_pic.search('localhost')>-1) cbar_pic = '';
+		if(cbar_pic.search(/[0-9]\/bmi\//)>-1) cbar_pic = '';		
+		
+	}
+
+	//Product Price
+	cbar_temp = cbar_Sizzle('section[class^="productBrief--"] div[class^="priceContainer-"]');
+	if (cbar_temp.length>0){ 
+	
+		cbar_pri = cbar_temp[0].innerText.replace(/^\s+|\s+$/g,"");
+			
+		if(cbar_pri.search(/\u20AC/) == -1)
+		{
+			cbar_ro = true;
+		}	
+	}
+
+	//Product price for NZ
+	cbar_temp = cbar_Sizzle('');
+	if(cbar_temp.length>0)
+		cbar_extra3 = '';
+
+	//out of stock. 
+	cbar_temp= cbar_Sizzle ('div[class^="labelWrapper-"] div[class^="soldOutBadge-"]');
+	if (cbar_temp.length>0 && cbar_temp[0].innerText.toLowerCase() == "sold out"){
+		cbar_oos = 1;
+	}
+	//******************************Abhay's Code End
+
+
+		
 		    
 		/*    
 		if(cbar_pid === '') { // detect product pages to run OP rules
