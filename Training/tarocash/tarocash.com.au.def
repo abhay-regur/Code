@@ -541,11 +541,14 @@ if (cbar_temp.length>0){
 		}
 
 
-	//******************************Abhay's Code Start
 	//Product Master ID cbar_masterid
 	cbar_temp = cbar_Sizzle('div[class^="reviewsContainer-"][data-bv-product-id]');
-	if(cbar_temp.length>0)
-		cbar_masterid = cbar_temp[0].getAttribute('data-bv-product-id').split(".")[0];
+	if(cbar_temp.length>0){
+		cbar_masterid_temp = cbar_temp[0].getAttribute('data-bv-product-id'); 
+		if(cbar_masterid_temp != null){
+			cbar_masterid = cbar_masterid_temp.split(".")[0];
+		}
+	}
 
 
 	//name	
@@ -555,7 +558,6 @@ if (cbar_temp.length>0){
 		 
 
 
-	//purl. (query parameters required for loading correct product page must be tested and included in the url, by default no parameters are included) 
 	var tmp = window.location.href.split("?");
 	cbar_purl = tmp[0];
 	
@@ -565,9 +567,9 @@ if (cbar_temp.length>0){
 	cbar_temp= cbar_Sizzle ('');	
 	if (cbar_temp.length>0)
 	{
-		cbar_cid 	= "";	//category id
-		cbar_cname	= "";	//optional		
-		cbar_cids_p	= "";	//parent category id		
+		cbar_cid 	= "";
+		cbar_cname	= "";	
+		cbar_cids_p	= "";	
 	}	
 	
 	
@@ -583,10 +585,10 @@ if (cbar_temp.length>0){
 	
 	
 	
-	if (cbar_cids_p!='') cbar_cids_cur=cbar_cid; // make sure the product cid doesnt change on server side when storing parent category.
+	if (cbar_cids_p!='') cbar_cids_cur=cbar_cid; 
 	
 	//Product image
-	var cbar_temp = cbar_Sizzle('section[class^="imageCarousel-"] div[class^="desktopImageContainer"] img[class="iiz__img  "]'); //generally from main image tag
+	var cbar_temp = cbar_Sizzle('section[class^="imageCarousel-"] div[class^="desktopImageContainer"] img[class="iiz__img  "]');
 	if (cbar_temp.length>0) {
 		
 		cbar_pic = cbar_temp[0].src;	
@@ -608,16 +610,18 @@ if (cbar_temp.length>0){
 	}
 
 	//Product price for NZ
-	cbar_temp = cbar_Sizzle('');
-	if(cbar_temp.length>0)
-		cbar_extra3 = '';
+	if(cbar_url.split('/')[3] == "nz"){
+		cbar_temp = cbar_Sizzle('section[class^="productBrief--"] div[class^="priceContainer-"]');
+		if(cbar_temp.length>0)
+			cbar_extra3 = cbar_temp[0].innerText.replace(/^\s+|\s+$/g,"");
+	}
 
 	//out of stock. 
 	cbar_temp= cbar_Sizzle ('div[class^="labelWrapper-"] div[class^="soldOutBadge-"]');
 	if (cbar_temp.length>0 && cbar_temp[0].innerText.toLowerCase() == "sold out"){
 		cbar_oos = 1;
 	}
-	//******************************Abhay's Code End
+	
 
 
 		
@@ -640,14 +644,13 @@ if ((cbar_url.toLowerCase().search('/search')>-1) && (cbar_url.toLowerCase().sea
 }
 
 // ajax cart
-/*
-if (cbar_pid || cbar_cid || cbar_home || cbar_url.toLowerCase().search('catalogsearch/result')>-1) {
+/*if (cbar_pid || cbar_cid || cbar_home || cbar_url.toLowerCase().search('/search')>-1) {
 	if (cbar_url.toLowerCase().search('checkout') == -1){
 		
 		cbar_check_cart = function()
 		{
 			var price = 0;
-			cbar_temp = cbar_Sizzle('#minicart-content-wrapper .subtotal .price-wrapper .price');
+			cbar_temp = cbar_Sizzle("div[class^='priceContainer'] div[class*='totalFinalPrice-']");
 			if(cbar_temp.length)
 			{
 				price_tmp = cbar_temp[0].innerHTML.match(/[0-9.,]+/);
@@ -664,17 +667,22 @@ if (cbar_pid || cbar_cid || cbar_home || cbar_url.toLowerCase().search('catalogs
 			cbar_pur_pids	= [];	//stores either product ids (recommended) or product names or products in cart
 			cbar_pur_qtys	= [];	//quantity of each product in cart
 					
-			var cbar_temp = cbar_Sizzle('#mini-cart li.product-item .product-item-details');
-			
-			for (var nodei=0; nodei < cbar_temp.length; nodei++){
-				pid_tmp = cbar_temp[nodei].getAttribute('productid');
-				if(pid_tmp != null)
-				{
-					cbar_pur_pids.push(pid_tmp.toLowerCase());	
-				}	
-			}
+			if(typeof(dataLayer) != "undefined"){
+                for (var key = dataLayer.length; key >= 0; key--) {
+                  	if(typeof(dataLayer[key]) != "undefined" && typeof(dataLayer[key][0]) != "undefined" &&  (dataLayer[key][0] == "event") && (dataLayer[key][1] == "page_view") && 
+                	(typeof(dataLayer[key][2].items) != "undefined")  && typeof (dataLayer[key][2].items[0]) != "undefined" && typeof (dataLayer[key][2].items[0].id) != "undefined") 
+                    {
+						for(var x = 0; x < (dataLayer[key][2].items.length); x++){
+							pid_tmp = dataLayer[key][2].items[x].id;
+							if(typeof(pid_tmp) != "undefined")
+							cbar_pur_pids.push(pid_tmp.toLowerCase());
+						}
+                		break;
+                	} 			
+                }
+            }
 
-			var cbar_temp = cbar_Sizzle('#mini-cart .product-item-details .details-qty span');
+			var cbar_temp = cbar_Sizzle('form[class^="productQuantity-"] div[class^="pillButton-"] span[class^="value-"]	');
 			for (var nodei=0; nodei < cbar_temp.length; nodei++){
 				qty_tmp = cbar_temp[nodei].innerHTML;
 				cbar_pur_qtys.push(qty_tmp);	//push product qty	
@@ -685,88 +693,52 @@ if (cbar_pid || cbar_cid || cbar_home || cbar_url.toLowerCase().search('catalogs
 }*/
 
 // Shopping Cart scraping.
-/*if (cbar_url.toLowerCase().search('checkout/cart')>-1) {
+if (cbar_url.toLowerCase().search('/checkout')>-1) {
 
-	
-			//cbar_pur_mode	= 1;	//Turn this on when sending items list by product names, instead of product ids (recommended)
+	cbar_is_pur		= 1;
 
-			cbar_is_pur		= 1;
-			
-			//cbar_crtn 		= 0;	//the number of different items in the cart and not their quantities.
+	cbar_check_cart = function()
+		{
+			var price = 0;
+			cbar_temp = cbar_Sizzle("div[class^='priceContainer'] div[class*='totalFinalPrice-']");
+			if(cbar_temp.length)
+			{
+				price_tmp = cbar_temp[0].innerHTML.match(/[0-9.,]+/);
+				if(price_tmp != null && price_tmp.length > 0)
+				{
+					price = price_tmp[0];
+				}
+			}	
+			return price;
+		}
+
+		cbar_scrape_ajax_cart = function()
+		{		
 			
 			cbar_pur_pids	= [];	//stores either product ids (recommended) or product names or products in cart
 			cbar_pur_qtys	= [];	//quantity of each product in cart
-			
-			
-			
-			var cbar_temp = cbar_Sizzle('#shopping-cart-table tbody .product-item-details');
+					
+			if(typeof(dataLayer) != "undefined"){
+                for (var key = dataLayer.length; key >= 0; key--) {
+                  	if(typeof(dataLayer[key]) != "undefined" && typeof(dataLayer[key][0]) != "undefined" &&  (dataLayer[key][0] == "event") && (dataLayer[key][1] == "page_view") && 
+                	(typeof(dataLayer[key][2].items) != "undefined")  && typeof (dataLayer[key][2].items[0]) != "undefined" && typeof (dataLayer[key][2].items[0].id) != "undefined") 
+                    {
+						for(var x = 0; x < (dataLayer[key][2].items.length); x++){
+							pid_tmp = dataLayer[key][2].items[x].id;
+							if(typeof(pid_tmp) != "undefined")
+							cbar_pur_pids.push(pid_tmp.toLowerCase());
+						}
+                		break;
+                	} 			
+                }
+            }
+
+			var cbar_temp = cbar_Sizzle('form[class^="productQuantity-"] div[class^="pillButton-"] span[class^="value-"]');
 			for (var nodei=0; nodei < cbar_temp.length; nodei++){
-				pid_tmp = cbar_temp[nodei].getAttribute('productid');
-				if(typeof(pid_tmp) != "undefined")
-				cbar_pur_pids.push(pid_tmp.toLowerCase());	//push product id/name. Make sure PIDs are lowerCased if they are 
-			}
-			
-			var cbar_temp = cbar_Sizzle('#shopping-cart-table tbody .qty select[id ^= "cart-"] option:selected');
-			for (var nodei=0; nodei < cbar_temp.length; nodei++){
-				qty_tmp= cbar_temp[nodei].value;
+				qty_tmp = cbar_temp[nodei].innerHTML;
 				cbar_pur_qtys.push(qty_tmp);	//push product qty	
-			}
-			
-			//coupon code handling...
-	cbar_temp = cbar_Sizzle ('input[name="coupon_code"]');
-	if (cbar_temp.length>0){
-		cbar_cou_input= cbar_temp[0];
-	}
-			
-	
-}*/	
-cbar_temp = cbar_Sizzle('div[class^="checkoutApp-"]')
-if (cbar_temp.length > 0 && cbar_url.toLowerCase().search('/checkout')>-1) {
-
-	//cbar_pur_mode	= 1;	//Turn this on when sending items list by product names, instead of product ids (recommended)
-
-	cbar_is_pur		= 1;
-	
-	//cbar_crtn 		= 0;	//the number of different items in the cart and not their quantities.
-	
-	cbar_pur_pids	= [];	//stores either product ids (recommended) or product names or products in cart
-	cbar_pur_qtys	= [];	//quantity of each product in cart
-	
-	
-	
-	var cbar_temp = cbar_Sizzle('');
-	for (var nodei=0; nodei < cbar_temp.length; nodei++)
-	{
-		pid_tmp = cbar_temp[nodei].href.match(/\/([^\/]*).html/);		
-		if(pid_tmp != null && pid_tmp.length > 1)
-		{
-			cbar_pur_pids.push(pid_tmp[1].toLowerCase());	//push product id/name. Make sure PIDs are lowerCased if they are alpha-numeric			
+			}			
 		}
-	}
-	
-	var cbar_temp = cbar_Sizzle('');
-	for (var nodei=0; nodei < cbar_temp.length; nodei++){
-		qty_tmp= cbar_temp[nodei].value;
-		
-		cbar_pur_qtys.push(qty_tmp);	//push product qty
-			
-	}
-	
-	//Scrape the cart total
-	
-	// !!!! Important: if cbar_crt is scraped make sure to scrape cbar_crtn & vice-versa !!!!
-	
-	/*cbar_temp = cbar_Sizzle('');	
-	if (cbar_temp.length>0){
-		cbar_crt = cbar_temp[0].innerHTML.replace(",",'');
-	}*/	
-	
-	//coupon code handling...
-	cbar_temp =cbar_Sizzle ('input[name="coupon_code"]');
-	if (cbar_temp.length>0){
-		cbar_cou_input= cbar_temp[0];
-	}
-	
 }
 
 
@@ -803,20 +775,48 @@ cbar_after_cou_inj = function (input){
 
 
 // Scrape email inputs. We scrape all the possible email inputs as an array from checkout, login or register pages
-if(cbar_url.toLowerCase().search('customer/account/login') > -1) { 
+
+
 	
-	cbar_e_input = cbar_Sizzle("input#email,input#email_address");
-	cbar_e_com=true;	
-	
-} 
-if(cbar_url.toLowerCase().search('au/checkout|nz/checkout') > -1)
-{
-	cbar_waitforelement("input#customer-email",
-		function(elements){	
-			cbar_em_listen(elements[0]);
-			cbar_e_com = true;		
+	//Checkout Page
+	if(cbar_url.toLowerCase().search('au/checkout|nz/checkout') > -1)
+	{
+		cbar_temp_email = cbar_Sizzle('div[class="account__email-wrapper"] input[id="email"]');
+		if(cbar_temp_email.length > 0){
+			cbar_e_input = cbar_temp_email[0];
+			cbar_e_com = true;
+		}
+	}
+
+	//Footer on Everypage
+	cbar_temp_email = cbar_Sizzle("footer input[id='newsletter-email']");
+	if(cbar_temp_email.length > 0) {
+		cbar_e_input = cbar_temp_email[0];
+		cbar_e_com = true;
+	  }
+
+
+	  //Contact us Page
+	  if(cbar_url.toLowerCase().search('/contact')>-1){
+		  cbar_temp_email = cbar_Sizzle("form[class^='contactForm'] input[id='email']");
+		  if(cbar_temp_email.length>0){
+			cbar_e_input = cbar_temp_email[0];
+			cbar_e_com = true;
+		  }
+	  }
+
+	  //Signin pop-up
+	  cbar_waitforelement('form[class^="form-"] input[id="email"]',function (elements) {
+		  cbar_em_listen(elements[0]);
+		  cbar_e_com = true;
+	  });
+
+	  //Register pop-up
+	  cbar_waitforelement('section[id="createAccount"] input[id="customer.email"]',function (elements) {
+		cbar_em_listen(elements[0]);
+		cbar_e_com = true;
 	});
-}
+
 
 
 //end email
