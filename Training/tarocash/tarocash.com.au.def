@@ -480,6 +480,14 @@ if (typeof cbar_url_watcher_interval != "undefined")
   window.clearInterval(cbar_url_watcher_interval);
 cbar_url_watcher_interval = window.setInterval(cbar_url_watcher, 500);
 
+//Reset CART on new session
+var cbar_pagev = parseInt(cbar_readCookie("cbar_sess_pv"));
+if (isNaN(cbar_pagev)) {
+  cbar_completed = function () {
+    cbar_empty_cart();
+  };
+}
+
 // Home page scraping
 if (
   document.location.pathname == "/" ||
@@ -629,8 +637,6 @@ if (cbar_temp.length > 0) {
   if (cbar_cid != "") cbar_cid = cbar_cid.toLowerCase();
   if (cbar_cids_p != "") cbar_cids_p = cbar_cids_p.toLowerCase();
 
-  if (cbar_cids_p != "") cbar_cids_cur = cbar_cid;
-
   //Product image
   var cbar_temp = cbar_Sizzle(
     'section[class^="imageCarousel-"] div[class^="desktopImageContainer"] img[class="iiz__img  "]'
@@ -676,25 +682,64 @@ if (cbar_temp.length > 0) {
   }
 
   //Single Product Cart Adding
+  if (cbar_pid.length > 0) {
+    cbar_temp = cbar_Sizzle(
+      "section[class^='cartActions-'] button[class*='addToCartButton']"
+    );
 
-  cbar_temp = cbar_Sizzle(
-    "section[class^='cartActions-'] button[class*='addToCartButton']"
-  );
-  if (cbar_temp.length > 0) {
-    cbar_temp_button = cbar_temp[0];
-    cbar_temp_button.addEventListener("click", function () {
-      cbar_temp2 = cbar_Sizzle(
-        "div[class^='swatchContainer-'] div[class^='isSelected-']"
-      );
-      if (cbar_temp2.length > 0 && cbar_pid.length > 0) {
-        console.log("clicked");
-        cbar_add_to_cart(cbar_pid, 1, 0);
+    for (let nodei of cbar_temp) {
+      console.log("Appling Event");
+      if (typeof jQuery != "undefined") {
+        jQuery(nodei)
+          .off("click", function () {})
+          .on("click", function () {
+            console.log("Clicked");
+            //Mini cart
+            // cbar_waitforelement(
+            //   ".ReactModal__Content .header-jRV",
+            //   function (ele) {
+            //     var qty = 1;
+            //     cbar_add_to_cart(cbar_pid, qty, 0);
+            //   }
+            // );
+          });
       }
-    });
+    }
+
+    // Old Code
+    /*cbar_waitforelement(
+      "section[class^='cartActions-'] button[class*='addToCartButton']",
+      function (elements) {
+        //Single Add to cart
+        console.log("button found");
+        cbar_temp = elements;
+        //cbar_temp = cbar_Sizzle("section[class^='cartActions-'] button[class*='addToCartButton']")
+        for (var nodei = 0; nodei < cbar_temp.length; nodei++) {
+          //Add events for mobile(touch screen) and desktop to trigger addtocart fn
+          addEvents = ["click"];
+          for (var j = 0; j < addEvents.length; j++) {
+            var tmp = cbar_temp[nodei];
+            tmp.removeEventListener(addEvents[j], function () {});
+            tmp.addEventListener(addEvents[j], function () {
+              console.log("Clicked");
+              //Mini cart
+              // cbar_waitforelement(
+              //   ".ReactModal__Content .header-jRV",
+              //   function (ele) {
+              //     var qty = 1;
+              //     cbar_add_to_cart(cbar_pid, qty, 0);
+              //   }
+              // );
+            });
+          }
+        }
+      }
+    );*/
   }
-  //end product page
+
+  //Single Product Cart Adding End
 }
-//Single Product Cart Adding End
+//end product page
 
 //Search page scraping
 if (
@@ -708,10 +753,10 @@ if (
 
 // Shopping Cart scraping.
 if (cbar_url.toLowerCase().search("/checkout") > -1) {
-  cbar_is_pur = 1;
+  cbar_is_pur = 0;
 
   cbar_check_cart = function () {
-    var price = 0;
+    var price = false;
     cbar_temp = cbar_Sizzle(
       "div[class^='priceContainer'] div[class*='totalFinalPrice-']"
     );
@@ -785,6 +830,7 @@ if (cbar_url.toLowerCase().search("/checkout") > -1) {
 
   // ONLY USE WHEN THERE IS PAGE REFRESH IN COUPON SUBMISSION
   cbar_before_cou_inj = function (input) {
+    /*
     // avoid infinite loop when injecting coupon causes page refresh
     var coupon_injected = cbar_readCookie("cbar_cou_inj");
     if (coupon_injected == null || coupon_injected == "false") {
@@ -793,29 +839,32 @@ if (cbar_url.toLowerCase().search("/checkout") > -1) {
     } else {
       cbar_createCookie("cbar_cou_inj", false);
       return false; // don't inject
-    }
-  };
-
-  // Function to inject Text into react coupon input
-  cbar_inject_code_in_cupon_input = function (input) {
-    if (typeof jQuery != "undefined") {
-      var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLInputElement.prototype,
-        "value"
-      ).set;
-      nativeInputValueSetter.call(cbar_cou_input, input);
-
-      var coupon_event = new Event("input", { bubbles: true });
-      cbar_cou_input.dispatchEvent(coupon_event);
-    }
+    }*/
   };
 
   cbar_after_cou_inj = function (input) {
-    window.onbeforeunload = null; // prevent leaving page events by the coupon apply page refresh (use only when coupon refreshes page)
-    if (typeof jQuery != "undefined")
+    //window.onbeforeunload = null; // prevent leaving page events by the coupon apply page refresh (use only when coupon refreshes page)
+
+    if (typeof jQuery != "undefined") {
+      //for refreshing react models when the view changes externally..
+      //https://github.com/facebook/react/issues/11488
+      let bari_coupon_input = input;
+      //keep empty to differentiate with tracker
+      let bari_cou_input_last_value = "";
+      bari_coupon_input.value = cbar_coupon_code;
+      let event = new Event("input", { bubbles: true });
+      // hack React15
+      event.simulated = true;
+      let tracker = bari_coupon_input._valueTracker;
+      if (tracker) {
+        tracker.setValue(bari_cou_input_last_value);
+      }
+      bari_coupon_input.dispatchEvent(event);
+
       jQuery(
         "form[class^='fieldButtonWrapper-'] button[class^='button']"
       ).trigger("click");
+    }
   };
 }
 //end coupon code callbacks
