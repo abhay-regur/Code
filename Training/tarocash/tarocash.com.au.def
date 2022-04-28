@@ -62,6 +62,11 @@ cbar_hold_execution= function (){
         }
     }
     
+    if (window.location.href.toLowerCase().search("/checkout") > -1) { 
+        
+        if (typeof (jQuery) == "dataLayer") return true;
+    }
+    
       
 	return false;
 
@@ -152,7 +157,7 @@ if (cbar_url.toLowerCase().search("/nz") > -1) {
 }
 
 //New Mode: reset extra variables with a space to support new mode (in new mode , empty fields do not get updated)
-//cbar_extra1=" "; //deal with old price that has been removed
+cbar_extra1 = " "; //deal with old price that has been removed
 //cbar_extra2 = " ";
 //cbar_extra3 = " ";
 
@@ -460,11 +465,11 @@ cbar_completed_run = (function () {
 cbar_delayed_action = []; //reset delayed actions like popups
 
 if (typeof cbar_previous_url == "undefined")
-  cbar_previous_url = window.location.href;
+  cbar_previous_url = window.location.pathname;
 
 cbar_url_watcher = function () {
-  if (window.location.href != cbar_previous_url) {
-    cbar_previous_url = window.location.href;
+  if (window.location.pathname != cbar_previous_url) {
+    cbar_previous_url = window.location.pathname;
     window.clearInterval(cbar_url_watcher_interval);
     if (window.console) console.log("bari: page change");
     window.setTimeout(function () {
@@ -472,7 +477,7 @@ cbar_url_watcher = function () {
       cbar_max_wait = 0;
       cbar_default_max_wait = 0;
       cbar_start();
-    }, 3000); // page loads with delay
+    }, 2000); // page loads with delay
   }
 };
 
@@ -596,147 +601,30 @@ if (cbar_temp.length > 0) {
     cbar_masterid = cbar_pid.split(".")[0];
   }
 
-  //name
-  cbar_temp = cbar_Sizzle('section[class^="title-"] h1[class^="productName-"]');
-  if (cbar_temp.length > 0) cbar_name = cbar_temp[0].innerHTML;
-
-  var tmp = window.location.href.split("?");
-  cbar_purl = tmp[0];
-
-  // Cbar cid and parent category
-
-  cbar_temp = cbar_Sizzle("div[class^='breadcrumbs-'] a");
-  if (cbar_temp.length > 1) {
-    cbar_temp_cid = cbar_temp[cbar_temp.length - 1].innerText.toLowerCase(); //category id
-    cbar_temp_cids_p = cbar_temp[cbar_temp.length - 2].innerText.toLowerCase(); //parent category id
-    if (
-      cbar_temp_cid.length > 0 &&
-      cbar_temp_cids_p.length > 0 &&
-      (cbar_temp_cids_p == "clothing" ||
-        cbar_temp_cids_p == "suiting" ||
-        cbar_temp_cids_p == "shirts" ||
-        cbar_temp_cids_p == "polos" ||
-        cbar_temp_cids_p == "chinos" ||
-        cbar_temp_cids_p == "jeans" ||
-        cbar_temp_cids_p == "suiting" ||
-        cbar_temp_cids_p == "jackets-coats" ||
-        cbar_temp_cids_p == "jumpers-knitwear" ||
-        cbar_temp_cids_p == "blazers" ||
-        cbar_temp_cids_p == "t-shirts" ||
-        cbar_temp_cids_p == "shorts" ||
-        cbar_temp_cids_p == "shoes" ||
-        cbar_temp_cids_p == "accessories")
-    ) {
-      cbar_cid = cbar_temp_cid;
-      cbar_cname = cbar_temp_cid;
-      cbar_cids_p = cbar_temp_cids_p;
-    }
-  }
-
-  //Lower case CIDs and Parent CIDs
-  if (cbar_cid != "") cbar_cid = cbar_cid.toLowerCase();
-  if (cbar_cids_p != "") cbar_cids_p = cbar_cids_p.toLowerCase();
-
-  //Product image
-  var cbar_temp = cbar_Sizzle(
-    'section[class^="imageCarousel-"] div[class^="desktopImageContainer"] img[class="iiz__img  "]'
-  );
-  if (cbar_temp.length > 0) {
-    cbar_pic = cbar_temp[0].src;
-    if (cbar_pic.search("localhost") > -1) cbar_pic = "";
-    if (cbar_pic.search(/[0-9]\/bmi\//) > -1) cbar_pic = "";
-  }
-
-  //Product Price
-  if (cbar_nz_site == false) {
-    cbar_temp = cbar_Sizzle(
-      'section[class^="productBrief--"] div[class^="priceContainer-"]'
-    );
-    if (cbar_temp.length > 0) {
-      cbar_pri = cbar_temp[0].innerText.replace(/^\s+|\s+$/g, "");
-
-      if (cbar_pri.search(/\u20AC/) == -1) {
-        cbar_ro = true;
-      }
-    }
-  }
-
-  //Product price for NZ
-  if (cbar_nz_site == true) {
-    cbar_temp = cbar_Sizzle(
-      'section[class^="productBrief--"] div[class^="priceContainer-"]'
-    );
-    if (cbar_temp.length > 0)
-      cbar_extra3 = cbar_temp[0].innerText.replace(/^\s+|\s+$/g, "");
-  }
-
-  //out of stock.
-  cbar_temp = cbar_Sizzle(
-    'div[class^="labelWrapper-"] div[class^="soldOutBadge-"]'
-  );
-  if (
-    cbar_temp.length > 0 &&
-    cbar_temp[0].innerText.toLowerCase() == "sold out"
-  ) {
-    cbar_oos = 1;
-  }
-
   //Single Product Cart Adding
   if (cbar_pid.length > 0) {
-    cbar_temp = cbar_Sizzle(
-      "section[class^='cartActions-'] button[class*='addToCartButton']"
-    );
+    //cbar_waitforelement("section[class^='cartActions-'] button[class*='addToCartButton']", function (elements) {
 
-    for (let nodei of cbar_temp) {
-      console.log("Appling Event");
-      if (typeof jQuery != "undefined") {
-        jQuery(nodei)
-          .off("click", function () {})
-          .on("click", function () {
-            console.log("Clicked");
+    if (typeof jQuery !== "undefined") {
+      jQuery("body")
+        .off("click.bari")
+        .on(
+          "click.bari",
+          "section[class^='cartActions-'] button[class*='addToCartButton']",
+          function () {
             //Mini cart
-            // cbar_waitforelement(
-            //   ".ReactModal__Content .header-jRV",
-            //   function (ele) {
-            //     var qty = 1;
-            //     cbar_add_to_cart(cbar_pid, qty, 0);
-            //   }
-            // );
-          });
-      }
-    }
-
-    // Old Code
-    /*cbar_waitforelement(
-      "section[class^='cartActions-'] button[class*='addToCartButton']",
-      function (elements) {
-        //Single Add to cart
-        console.log("button found");
-        cbar_temp = elements;
-        //cbar_temp = cbar_Sizzle("section[class^='cartActions-'] button[class*='addToCartButton']")
-        for (var nodei = 0; nodei < cbar_temp.length; nodei++) {
-          //Add events for mobile(touch screen) and desktop to trigger addtocart fn
-          addEvents = ["click"];
-          for (var j = 0; j < addEvents.length; j++) {
-            var tmp = cbar_temp[nodei];
-            tmp.removeEventListener(addEvents[j], function () {});
-            tmp.addEventListener(addEvents[j], function () {
-              console.log("Clicked");
-              //Mini cart
-              // cbar_waitforelement(
-              //   ".ReactModal__Content .header-jRV",
-              //   function (ele) {
-              //     var qty = 1;
-              //     cbar_add_to_cart(cbar_pid, qty, 0);
-              //   }
-              // );
-            });
+            cbar_waitforelement(
+              ".ReactModal__Content .header-jRV",
+              function (ele) {
+                var qty = 1;
+                cbar_add_to_cart(cbar_pid, qty, 0);
+              }
+            );
           }
-        }
-      }
-    );*/
+        );
+    }
+    //});
   }
-
   //Single Product Cart Adding End
 }
 //end product page
@@ -753,14 +641,55 @@ if (
 
 // Shopping Cart scraping.
 if (cbar_url.toLowerCase().search("/checkout") > -1) {
-  cbar_is_pur = 0;
+  cbar_scrape_ajax_cart_page = function () {
+    //cbar_pur_mode	= 1;	//Turn this on when sending items list by product names, instead of product ids (recommended)
+    cbar_is_pur = 1;
+    //cbar_crtn 		= 0;	//the number of different items in the cart and not their quantities.
+
+    cbar_pur_pids = []; //stores either product ids (recommended) or product names or products in cart
+    cbar_pur_qtys = []; //quantity of each product in cart
+
+    if (typeof dataLayer != "undefined") {
+      for (var key = dataLayer.length; key >= 0; key--) {
+        if (
+          typeof dataLayer[key] != "undefined" &&
+          typeof dataLayer[key][0] != "undefined" &&
+          dataLayer[key][0] == "event" &&
+          dataLayer[key][1] == "page_view" &&
+          typeof dataLayer[key][2].items != "undefined" &&
+          typeof dataLayer[key][2].items[0] != "undefined" &&
+          typeof dataLayer[key][2].items[0].id != "undefined"
+        ) {
+          for (var x = 0; x < dataLayer[key][2].items.length; x++) {
+            pid_tmp = dataLayer[key][2].items[x].id;
+            if (typeof pid_tmp != "undefined")
+              cbar_pur_pids.push(pid_tmp.toLowerCase());
+          }
+          break;
+        }
+      }
+    }
+
+    var cbar_temp = cbar_Sizzle(
+      'form[class^="productQuantity-"] div[class^="pillButton-"] span[class^="value-"]'
+    );
+    for (var nodei = 0; nodei < cbar_temp.length; nodei++) {
+      qty_tmp = cbar_temp[nodei].innerHTML;
+      cbar_pur_qtys.push(qty_tmp); //push product qty
+    }
+  };
 
   cbar_check_cart = function () {
-    var price = false;
+    // item container
+    cbar_temp1 = cbar_Sizzle(
+      'div[class^="itemSummary"] div[class^="productDetailsWrapper"]'
+    );
+
+    var price = 0;
     cbar_temp = cbar_Sizzle(
       "div[class^='priceContainer'] div[class*='totalFinalPrice-']"
     );
-    if (cbar_temp.length) {
+    if (cbar_temp.length && cbar_temp1.length > 0) {
       price_tmp = cbar_temp[0].innerHTML.match(/[0-9.,]+/);
       if (price_tmp != null && price_tmp.length > 0) {
         price = price_tmp[0];
@@ -769,43 +698,10 @@ if (cbar_url.toLowerCase().search("/checkout") > -1) {
     return price;
   };
 
+  cbar_scrape_ajax_cart_page();
+
   cbar_scrape_ajax_cart = function () {
-    cbar_pur_pids = []; //stores either product ids (recommended) or product names or products in cart
-    cbar_pur_qtys = []; //quantity of each product in cart
-
-    cbar_temp = cbar_Sizzle(
-      'div[class^="itemSummary"] div[class^="productDetailsWrapper"]'
-    );
-    if (cbar_temp.length > 0) {
-      if (typeof dataLayer != "undefined") {
-        for (var key = dataLayer.length; key >= 0; key--) {
-          if (
-            typeof dataLayer[key] != "undefined" &&
-            typeof dataLayer[key][0] != "undefined" &&
-            dataLayer[key][0] == "event" &&
-            dataLayer[key][1] == "page_view" &&
-            typeof dataLayer[key][2].items != "undefined" &&
-            typeof dataLayer[key][2].items[0] != "undefined" &&
-            typeof dataLayer[key][2].items[0].id != "undefined"
-          ) {
-            for (var x = 0; x < dataLayer[key][2].items.length; x++) {
-              pid_tmp = dataLayer[key][2].items[x].id;
-              if (typeof pid_tmp != "undefined")
-                cbar_pur_pids.push(pid_tmp.toLowerCase());
-            }
-            break;
-          }
-        }
-      }
-
-      var cbar_temp = cbar_Sizzle(
-        'form[class^="productQuantity-"] div[class^="pillButton-"] span[class^="value-"]'
-      );
-      for (var nodei = 0; nodei < cbar_temp.length; nodei++) {
-        qty_tmp = cbar_temp[nodei].innerHTML;
-        cbar_pur_qtys.push(qty_tmp); //push product qty
-      }
-    }
+    cbar_scrape_ajax_cart_page();
   };
   //Scrape the cart total
 
