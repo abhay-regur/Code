@@ -1,9 +1,15 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function articlepreview(props) {
+function Articlepreview(props) {
+  const navigate = useNavigate();
   const handleLink = (event, author) => {
     event.preventDefault();
     props.handleAuthorClick(author);
+  };
+  const gotoArticle = (e, slug) => {
+    e.preventDefault();
+    navigate("/article/" + slug, { state: { id: 7, color: "green" } });
   };
   return (
     <>
@@ -41,7 +47,11 @@ export default function articlepreview(props) {
               </div>
             </a>
           </div>
-          <a href={"/article/" + article.slug} className="preview-link">
+          <a
+            href={"/article/"}
+            className="preview-link"
+            onClick={(e) => gotoArticle(e, article.slug)}
+          >
             <h2>{article.title}</h2>
             <p>{article.description}</p>
             <span>Read more...</span>
@@ -58,3 +68,4 @@ export default function articlepreview(props) {
     </>
   );
 }
+export default Articlepreview;
