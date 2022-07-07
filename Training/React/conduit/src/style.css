@@ -310,6 +310,15 @@ ul.tag-list li {
     opacity: 1;
 }
 
+.article-page .card .comment-author {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.article-page .card .comment-delete {
+    color: red;
+}
+
 .article-actions .article-meta .author {
     color: #5CB85C;
 }
