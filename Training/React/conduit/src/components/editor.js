@@ -146,7 +146,7 @@ function Editor(props) {
               </div>
 
               <button
-                className="btn btn-lg float-right btn-primary"
+                className="btn btn-lg float-right btn-success"
                 type="button"
                 onClick={submitForm}
               >

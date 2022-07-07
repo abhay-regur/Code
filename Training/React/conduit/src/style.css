@@ -28,6 +28,50 @@ a:hover {
     text-decoration: none;
 }
 
+.card {
+    position: relative;
+    display: block;
+    margin-bottom: 0.75rem;
+    background-color: #fff;
+    border-radius: 0.25rem;
+}
+
+.card-block {
+    padding: 1.25rem;
+}
+
+.no-token-request {
+    margin-bottom: 1rem;
+}
+
+.btn-success {
+    background-color: #5CB85C;
+}
+
+.btn-secondary-active {
+    background-color: #8d8d8d;
+    color: #fff;
+}
+
+.btn-secondary-active:hover {
+    color: #6c757d;
+    background-color: transparent;
+}
+
+.btn-success-active {
+    background-color: #5CB85C;
+    color: #fff;
+}
+
+.btn-success-active:hover {
+    color: #5CB85C;
+    background-color: transparent;
+}
+
+#root div.main {
+    margin-bottom: 100px;
+}
+
 .navbar-brand {
     font-family: titillium web, sans-serif;
     font-size: 1.5rem !important;
@@ -88,6 +132,232 @@ ul.tag-list li {
     display: inline-block !important;
 }
 
+/* ---------------------------------- */
+.article-page .banner {
+    padding: 2rem 0 2rem 0;
+    color: #fff;
+    background: #333;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.article-page .banner h1 {
+    font-size: 2.8rem;
+    font-weight: 600;
+}
+
+.article-page .banner .btn {
+    opacity: 0.8;
+}
+
+.article-page .banner .btn:hover {
+    transition: 0.1s all;
+    opacity: 1;
+}
+
+.article-page .banner .article-meta {
+    margin: 2rem 0 0 0;
+    display: block;
+    position: relative;
+    font-weight: 300;
+}
+
+.article-page .article-header {
+    margin: 0 0 1rem 0;
+}
+
+.article-page .article-header {
+    display: block;
+    position: relative;
+    font-weight: 300;
+}
+
+.article-page .article-header img {
+    display: inline-block;
+    vertical-align: middle;
+    height: 32px;
+    width: 32px;
+    border-radius: 30px;
+}
+
+.article-page .article-meta .author {
+    color: #fff;
+}
+
+.article-page .article-meta img {
+    display: inline-block;
+    vertical-align: middle;
+    height: 32px;
+    width: 32px;
+    border-radius: 30px;
+}
+
+.article-page .article-meta .info {
+    margin: 0 1.5rem 0 0.3rem;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1rem;
+}
+
+.article-page .article-meta .info {
+    margin: 0 1.5rem 0 0.3rem;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1rem;
+}
+
+.article-page .article-meta .info .date {
+    color: #bbb;
+    font-size: 0.8rem;
+    display: block;
+}
+
+.article-page .article-meta .info .author {
+    display: block;
+    font-weight: 500 !important;
+}
+
+.article-page .article-content p {
+    font-family: 'Source Serif Pro', serif;
+    font-size: 1.2rem;
+    line-height: 1.8rem;
+    margin-bottom: 2rem;
+}
+
+.article-page .article-content h1,
+.article-page .article-content h2,
+.article-page .article-content h3,
+.article-page .article-content h4,
+.article-page .article-content h5,
+.article-page .article-content h6 {
+    font-weight: 500 !important;
+    margin: 1.6rem 0 1rem 0;
+}
+
+.article-page .article-actions {
+    text-align: center;
+    margin: 1.5rem 0 3rem 0;
+}
+
+.article-page .article-actions .article-meta .info {
+    text-align: left;
+}
+
+.article-page .comment-form .card-block {
+    padding: 0;
+}
+
+.article-page .comment-form .card-block textarea {
+    border: 0px;
+    padding: 1.25rem;
+}
+
+.article-page .comment-form .card-footer .btn {
+    font-weight: 700;
+    float: right;
+}
+
+.article-page .comment-form .card-footer .comment-author-img {
+    height: 30px;
+    width: 30px;
+}
+
+.article-page .card {
+    border: 1px solid #e5e5e5;
+    box-shadow: none !important;
+}
+
+.article-page .card .card-footer {
+    border-top: 1px solid #e5e5e5;
+    box-shadow: none !important;
+    font-size: 0.8rem;
+    font-weight: 300;
+}
+
+.article-page .card .comment-author-img {
+    display: inline-block;
+    vertical-align: middle;
+    height: 20px;
+    width: 20px;
+    border-radius: 30px;
+}
+
+.article-page .card .comment-author {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.article-page .card .date-posted {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 5px;
+    color: #bbb;
+}
+
+.article-page .card .mod-options {
+    float: right;
+    color: #333;
+    font-size: 1rem;
+}
+
+.article-page .card .mod-options i {
+    margin-left: 5px;
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.article-page .card .mod-options i:hover {
+    opacity: 1;
+}
+
+.article-actions .article-meta .author {
+    color: #5CB85C;
+}
+
+
+
+
+.profile-page .user-info {
+    text-align: center;
+    background: #f3f3f3;
+    padding: 2rem 0 1rem 0;
+}
+
+.profile-page .user-info .user-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+}
+
+.profile-page .user-info h4 {
+    font-weight: 700;
+}
+
+.profile-page .user-info p {
+    margin: 0 auto 0.5rem auto;
+    color: #aaa;
+    max-width: 450px;
+    font-weight: 300;
+}
+
+.profile-page .user-info .action-btn {
+    float: right;
+    color: #999;
+    border: 1px solid #999;
+}
+
+.profile-page .articles-toggle {
+    margin: 1.5rem 0 -1px 0;
+}
+
+.editor-page .tag-list i {
+    font-size: 0.6rem;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+
 
 /* ---------------------------------- */
 
@@ -136,6 +406,8 @@ ul.tag-list li {
     border-bottom: 2px solid #5CB85C !important;
     color: #5CB85C !important;
 }
+
+
 
 .main-wrapper .sidebar {
     background: #f3f3f3;

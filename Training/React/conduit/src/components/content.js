@@ -143,7 +143,7 @@ export default function Content(props) {
     setselectedTag(author);
   };
   return (
-    <div className="main-wrapper">
+    <div className="main main-wrapper">
       <Header />
       <div className="container">
         <div className="row">
@@ -240,7 +240,7 @@ export default function Content(props) {
             )}
           </div>
           <div className="col-md-3">
-            <div className="card sidebar">
+            <div className="card sidebar mt-2">
               <div className="card-body">
                 <h6 className="card-title">Popular Tags</h6>
                 <TagList tagLists={tagItemsList} handleClick={handletagClick} />
