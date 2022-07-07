@@ -46,7 +46,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/newArticle" element={<Editor />} />
-        <Route path="/article" element={<Article />}>
+        <Route path="/article" element={<Article username={username} />}>
           <Route path=":articleSlug" element={<Article />} />
         </Route>
         <Route path="/setting" element={<Setting />} />
