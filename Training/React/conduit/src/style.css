@@ -1,0 +1,275 @@
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');
+
+.logo-font {
+    font-family: titillium web, sans-serif;
+}
+
+html {
+    position: relative;
+    min-height: 100vh;
+}
+
+body {
+    font-family: source sans pro, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #373a3c;
+    background-color: #fff;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: #5CB85C;
+}
+
+a:hover {
+    color: #5CB85C;
+    text-decoration: none;
+}
+
+.navbar-brand {
+    font-family: titillium web, sans-serif;
+    font-size: 1.5rem !important;
+    padding-top: 0 !important;
+    margin-right: 2rem !important;
+    color: #5cb85c !important;
+    font-weight: 700;
+}
+
+.nav .nav-item+.nav-item {
+    margin-left: 1rem;
+}
+
+.nav .nav-item .nav-link {
+    text-decoration: none;
+    color: #0000004d;
+    padding: 0.425rem 0;
+}
+
+.nav .nav-item .nav-link:hover {
+    color: #00000099;
+}
+
+.nav .nav-item .nav-link:focus {
+    color: #00000099;
+}
+
+.material-icons {
+    font-size: 1rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.tag-default {
+    color: #fff !important;
+    font-size: 0.8rem;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+    white-space: nowrap;
+    margin-right: 3px;
+    margin-bottom: 0.2rem;
+    display: inline-block;
+}
+
+.tag-pill {
+    padding-right: 0.6em;
+    padding-left: 0.6em;
+    border-radius: 10rem;
+}
+
+.tag-default.tag-outline {
+    border: 1px solid #ddd;
+    color: #aaa !important;
+    background: none !important;
+}
+
+ul.tag-list li {
+    display: inline-block !important;
+}
+
+
+/* ---------------------------------- */
+
+.jumbotron {
+    color: #fff;
+    background: #5cb85c;
+    box-shadow: inset 0 8px 8px -8px rgba(0, 0, 0, .3), inset 0 -8px 8px -8px rgba(0, 0, 0, .3);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.jumbotron .container p {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 300 !important;
+    margin-bottom: 0;
+}
+
+.jumbotron .container h1 {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+    font-weight: 700 !important;
+    text-align: center;
+    font-size: 3.5rem;
+}
+
+.feed-toggle {
+    margin-bottom: -1px;
+}
+
+.nav-pills .nav-link {
+    display: block;
+    padding: 0.5em 1em;
+    border-radius: 0.25rem;
+}
+
+.nav-pills.outline-active .nav-link {
+    border-radius: 0px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: #aaa;
+}
+
+.nav-pills.outline-active .nav-link.active {
+    background: #fff !important;
+    border-bottom: 2px solid #5CB85C !important;
+    color: #5CB85C !important;
+}
+
+.main-wrapper .sidebar {
+    background: #f3f3f3;
+    border-radius: 4px;
+    border: 0px;
+}
+
+.main-wrapper .sidebar .card-body {
+    padding: 5px 10px 10px 10px;
+}
+
+.main-wrapper .sidebar .card-body .tag-default {
+    background-color: #818a91;
+}
+
+.main-wrapper .sidebar .card-body .tag-default[href]:focus,
+.main-wrapper .sidebar .card-body .tag-default[href]:hover {
+    background-color: #687077;
+}
+
+.article-preview {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.5rem 0;
+}
+
+.article-preview .article-header {
+    margin: 0 0 1rem 0;
+}
+
+.article-preview .article-header {
+    display: block;
+    position: relative;
+    font-weight: 300;
+}
+
+.article-preview .article-header img {
+    display: inline-block;
+    vertical-align: middle;
+    height: 32px;
+    width: 32px;
+    border-radius: 30px;
+}
+
+.article-preview .article-header .user-info {
+    margin: 0 1.5rem 0 0.3rem;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1rem;
+}
+
+.article-preview .article-header .user-info .userName {
+    margin-bottom: 0px;
+    display: block;
+    font-weight: 500 !important;
+}
+
+.article-preview .article-header .user-info .date {
+    color: #bbb;
+    font-size: 0.8rem;
+    display: block;
+}
+
+
+.article-preview .preview-link h2 {
+    color: #373a3c !important;
+    font-weight: 600 !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 3px;
+}
+
+.article-preview .preview-link p {
+    font-weight: 300;
+    font-size: 24px;
+    color: #999;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    line-height: 1.3rem;
+}
+
+.article-preview .preview-link span {
+    max-width: 30%;
+    font-size: 0.8rem;
+    font-weight: 300;
+    color: #bbb;
+    vertical-align: middle;
+}
+
+.article-preview .preview-link ul {
+    float: right;
+    max-width: 50%;
+    vertical-align: top;
+}
+
+.article-preview .preview-link ul li {
+    font-weight: 300;
+    font-size: 0.8rem !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+
+.article-preview .preview-link .btn .counter {
+    font-size: 0.8rem !important;
+}
+
+/* ---------------------------------- */
+
+.editor-page {
+    margin-bottom: 80px;
+}
+
+/* ---------------------------------- */
+.footer {
+    background: #f3f3f3;
+    margin-top: 3rem;
+    padding: 1rem 0;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer .logo-font {
+    vertical-align: middle;
+}
+
+.footer a {
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.footer .attribution {
+    vertical-align: middle;
+    margin-left: 10px;
+    font-size: 0.8rem;
+    color: #bbb;
+    font-weight: 300;
+}
