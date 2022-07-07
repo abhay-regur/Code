@@ -1,9 +1,12 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-function Article() {
+function Article(props) {
   const [token, setToken] = useState();
   const [articleSlug, setArticleSlug] = useState();
+  const [postComment, setPostComment] = useState();
+  const [isRunning, setisRunning] = useState(false);
+  const [articleUpdated, setArticleupdated] = useState(false);
   const [article, setArticle] = useState({
     slug: "",
     title: "",
@@ -22,9 +25,7 @@ function Article() {
     },
   });
 
-  const [isRunning, setisRunning] = useState(false);
-
-  const [articleUpdated, setArticleupdated] = useState(false);
+  const [comments, setComments] = useState();
 
   const baseURL = "https://api.realworld.io";
   const defaultImage = "https://api.realworld.io/images/smiley-cyrus.jpeg";
@@ -53,15 +54,24 @@ function Article() {
           setToken(authToken);
           setisRunning(false);
         });
+      obj = null;
+
+      axios
+        .get(baseURL + "/api/articles/" + slug + "/comments", {
+          headers: { Authorization: `Token ${authToken || ""}` },
+        })
+        .then((Response) => {
+          if (Response.status === 200) {
+            obj = Object.assign(Response.data.comments);
+            setComments(obj);
+          }
+        });
     }
   }, []);
 
   useEffect(() => {
-    if (!isRunning) {
-      console.log("aricle updated");
-      setArticleupdated(true);
-    }
-  }, [article, isRunning]);
+    setArticleupdated(true);
+  }, [article]);
 
   const handleFollow = (e) => {
     e.preventDefault();
@@ -80,6 +90,7 @@ function Article() {
           .then((Response) => {
             if (Response.status === 200) {
               obj.author.following = true;
+              setArticle(obj);
               setisRunning(false);
             }
           })
@@ -98,6 +109,7 @@ function Article() {
           .then((Response) => {
             if (Response.status === 200) {
               obj.author.following = false;
+              setArticle(obj);
               setisRunning(false);
             }
           })
@@ -106,7 +118,6 @@ function Article() {
             setisRunning(false);
           });
       }
-      setArticle(obj);
     }
     e = null;
   };
@@ -116,7 +127,7 @@ function Article() {
     if (!isRunning && token) {
       let obj = { ...article };
       setisRunning(true);
-      if (!event.target.classList.contains("btn-secondary-active")) {
+      if (!event.target.classList.contains("btn-success-active")) {
         axios
           .post(
             baseURL + "/api/articles/" + articleSlug + "/favorite",
@@ -128,6 +139,8 @@ function Article() {
           .then((Response) => {
             if (Response.status === 200) {
               obj.favorited = true;
+              obj.favoritesCount++;
+              setArticle(obj);
               setisRunning(false);
             }
           })
@@ -143,6 +156,8 @@ function Article() {
           .then((Response) => {
             if (Response.status === 200) {
               obj.favorited = false;
+              obj.favoritesCount--;
+              setArticle(obj);
               setisRunning(false);
             }
           })
@@ -151,42 +166,63 @@ function Article() {
             setisRunning(false);
           });
       }
-      setArticle(obj);
     }
     event = null;
-  };
-
-  const debugger_ = (e) => {
-    console.log(articleSlug);
-    console.log(token);
-    console.log(isRunning);
-    console.log(articleUpdated);
-    console.log(article);
-    console.log();
-    console.log();
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log(new FormData(event.currentTarget));
-    if (false) {
+    let comment = postComment;
+    if (!isRunning && token) {
+      setisRunning(true);
       axios
         .post(
           baseURL + "/api/articles/" + articleSlug + "/comments",
-          {},
+          {
+            comment: { body: comment },
+          },
           {
             headers: { Authorization: `Token ${token}` },
           }
         )
-        .then()
-        .catch();
+        .then((Response) => {
+          if (Response.status === 200) {
+            setComments(...comments, Response.data.comment);
+            setisRunning(false);
+          }
+        })
+        .catch((error) => {
+          console.log(error.message);
+          setisRunning(false);
+        });
     }
     event = null;
   };
 
+  const handleDelete = (e, id) => {
+    e.preventDefault();
+    if (!isRunning && token) {
+      setisRunning(true);
+      axios
+        .delete(baseURL + "/api/articles/" + articleSlug + "/comments/" + id, {
+          headers: { Authorization: `Token ${token}` },
+        })
+        .then((Response) => {
+          if (Response.status === 200) {
+            setComments(comments.filter((obj) => obj.id !== id));
+            setisRunning(false);
+          }
+        })
+        .catch((error) => {
+          console.log(error.message);
+          setisRunning(false);
+        });
+    }
+  };
+
   return (
     <div className="main article-wrapper">
-      <button onClick={(e) => debugger_(e)}>debugger</button>
+      {/* <button onClick={(e) => debugger_(e)}>debugger</button> */}
       {articleUpdated ? (
         <div className="article-page">
           <div className="banner">
@@ -194,15 +230,18 @@ function Article() {
               <h1>{article.title || ""}</h1>
 
               <div className="article-meta">
-                <a href={"/profile/" + article.username}>
+                <a href={"/profile/" + article.author.username}>
                   <img
                     src={article.author.image || { defaultImage }}
-                    alt={article.author.name}
+                    alt={article.author.username}
                   />
                 </a>
                 <div className="info">
-                  <a href="/" className="author">
-                    {article.author.name}
+                  <a
+                    href={"/profile/" + article.author.username}
+                    className="author"
+                  >
+                    {article.author.username}
                   </a>
                   <time className="date" dateTime={article.createdAt}>
                     {new Date(article.createdAt).toDateString()}
@@ -250,7 +289,7 @@ function Article() {
 
             <div className="article-actions">
               <div className="article-meta">
-                <a href="profile.html">
+                <a href={"/profile/" + article.author.username}>
                   <img
                     src={article.author.image || { defaultImage }}
                     alt={article.author.name}
@@ -306,6 +345,10 @@ function Article() {
                         name="commentArea"
                         placeholder="Write a comment..."
                         rows="3"
+                        required
+                        onChange={(e) => {
+                          setPostComment(e.target.value);
+                        }}
                       ></textarea>
                     </div>
                     <div className="card-footer">
@@ -325,56 +368,60 @@ function Article() {
                     <a href="/register">Sign Up</a> to comment on this article.
                   </div>
                 )}
-
-                <div className="card">
-                  <div className="card-block">
-                    <p className="card-text">
-                      With supporting text below as a natural lead-in to
-                      additional content.
-                    </p>
-                  </div>
-                  <div className="card-footer">
-                    <a href="/" className="comment-author">
-                      <img
-                        src="http://i.imgur.com/Qr71crq.jpg"
-                        className="comment-author-img"
-                        alt=""
-                      />
-                    </a>
-                    &nbsp;
-                    <a href="/" className="comment-author">
-                      Jacob Schmidt
-                    </a>
-                    <span className="date-posted">Dec 29th</span>
-                  </div>
-                </div>
-
-                <div className="card">
-                  <div className="card-block">
-                    <p className="card-text">
-                      With supporting text below as a natural lead-in to
-                      additional content.
-                    </p>
-                  </div>
-                  <div className="card-footer">
-                    <a href="/" className="comment-author">
-                      <img
-                        src="http://i.imgur.com/Qr71crq.jpg"
-                        className="comment-author-img"
-                        alt=""
-                      />
-                    </a>
-                    &nbsp;
-                    <a href="/" className="comment-author">
-                      Jacob Schmidt
-                    </a>
-                    <span className="date-posted">Dec 29th</span>
-                    <span className="mod-options">
-                      <i className="ion-edit"></i>
-                      <i className="ion-trash-a"></i>
-                    </span>
-                  </div>
-                </div>
+                {comments ? (
+                  comments.map((comment) => {
+                    return (
+                      <div className="card" key={comment.id}>
+                        <div className="card-block">
+                          <p className="card-text">{comment.body}</p>
+                        </div>
+                        <div className="card-footer">
+                          <a
+                            href={"/profile/" + comment.author.username}
+                            className="comment-author"
+                          >
+                            <img
+                              src={comment.author.image || defaultImage}
+                              className="comment-author-img"
+                              alt={comment.author.username}
+                            />
+                          </a>
+                          &nbsp;
+                          <a
+                            href={"/profile/" + comment.author.username}
+                            className="comment-author"
+                          >
+                            &nbsp;
+                            {comment.author.username}
+                          </a>
+                          &nbsp;
+                          <time
+                            className="date-posted"
+                            dateTime={article.createdAt}
+                          >
+                            {new Date(comment.createdAt).toDateString()}
+                          </time>
+                          {props.username === comment.author.username ? (
+                            <span
+                              className="comment-delete float-right"
+                              onClick={(e) => {
+                                handleDelete(e, comment.id);
+                              }}
+                            >
+                              <i className="material-icons material-icons-outlined">
+                                delete
+                              </i>
+                            </span>
+                          ) : (
+                            <></>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           </div>
