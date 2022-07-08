@@ -49,8 +49,8 @@ function App() {
         <Route path="/article" element={<Article username={username} />}>
           <Route path=":articleSlug" element={<Article />} />
         </Route>
-        <Route path="/setting" element={<Setting />} />
-        <Route path="/profile" element={<Profile />}>
+        <Route path="/setting" element={<Setting username={username} />} />
+        <Route path="/profile" element={<Profile username={username} />}>
           <Route path=":Username" element={<Profile />} />
         </Route>
       </Routes>
