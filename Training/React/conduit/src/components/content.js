@@ -6,18 +6,16 @@ import PropTypes from "prop-types";
 import axios from "axios";
 
 export default function Content(props) {
-  // const baseURL = "http://127.0.0.1:8000";
   const baseURL = "https://api.realworld.io";
+
   const [isRunning, setisRunning] = useState(false);
   const [activeId, setActiveId] = useState();
   const [selectedTag, setselectedTag] = useState("");
   // const [isupdate, setisUpdated] = useState(false);
   const [tagItemsList, settagItemsList] = useState([]);
   const [token, setToken] = useState("");
-  const [articleObj, setarticleObj] = useState({
-    articles: [],
-    articlesCount: 0,
-  });
+  const [articleObj, setarticleObj] = useState({});
+  const [articleCount, setArticleCount] = useState();
 
   useEffect(() => {
     let authToken = localStorage.getItem("jwtToken");
@@ -59,7 +57,8 @@ export default function Content(props) {
         .then((response) => {
           if (response.status === 200) {
             setisRunning(false);
-            setarticleObj(response.data);
+            setarticleObj(response.data.articles);
+            setArticleCount(response.data.articlesCount);
           }
         })
         .catch((error) => {
@@ -69,11 +68,21 @@ export default function Content(props) {
     }
   };
 
-  const handleArticleupdate = (article) => {
-    setarticleObj({ ...articleObj, [article.favorited]: article });
+  const handleArticleChange = (article) => {
+    setarticleObj(
+      articleObj.map((ar) => {
+        return ar.slug === article.slug
+          ? { ...ar, favorited: article.favorited } && {
+              ...ar,
+              favoritesCount: article.favoritesCount,
+            }
+          : ar;
+      })
+    );
   };
 
   const handleClick = (event, type) => {
+    event.stopPropagation();
     setActiveId(event.target.id);
     getArticles(token, baseURL + type);
   };
@@ -85,7 +94,7 @@ export default function Content(props) {
       if (token) {
         setisRunning(true);
         let followingStatus =
-          event.currentTarget.classList.contains("btn-following");
+          event.currentTarget.classList.contains("btn-success-active");
 
         if (!followingStatus) {
           axios
@@ -98,9 +107,8 @@ export default function Content(props) {
             )
             .then((response) => {
               if (response.status === 200) {
+                handleArticleChange(response.data.article);
                 setisRunning(false);
-                handleArticleupdate(articleObj);
-                // event.currentTarget.classList.toggle("btn-following");
               }
             })
             .catch((error) => {
@@ -114,7 +122,7 @@ export default function Content(props) {
             })
             .then((response) => {
               if (response.status === 200) {
-                handleArticleupdate(response.data.article);
+                handleArticleChange(response.data.article);
                 setisRunning(false);
               }
             })
@@ -137,10 +145,14 @@ export default function Content(props) {
     setselectedTag(tag);
   };
 
-  const handleAuthorClick = (author) => {
-    setActiveId("tagBbtn");
-    getArticles(token, baseURL + "/api/articles?author=" + author + "&");
-    setselectedTag(author);
+  const debugme = (event) => {
+    event.preventDefault();
+    console.log(isRunning);
+    console.log(activeId);
+    console.log(selectedTag);
+    console.log(tagItemsList);
+    console.log(token);
+    console.log(articleObj);
   };
   return (
     <div className="main main-wrapper">
@@ -229,15 +241,12 @@ export default function Content(props) {
                 )}
               </ul>
             </div>
-            {articleObj.articlesCount > 0 ? (
+            {
               <ArticlePreview
-                {...articleObj}
+                article={articleObj}
                 handleClick={handleBtnClick}
-                handleAuthorClick={handleAuthorClick}
               />
-            ) : (
-              <>No articles are here... yet.</>
-            )}
+            }
           </div>
           <div className="col-md-3">
             <div className="card sidebar mt-2">
