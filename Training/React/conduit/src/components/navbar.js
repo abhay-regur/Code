@@ -45,7 +45,7 @@ function LoggedInNavbar(props) {
         </Link>
       </li>
       <li className="nav-item withUser">
-        <Link className="nav-link" to="/profile">
+        <Link className="nav-link" to={"/profile/@" + props.loggedUser}>
           <i className="material-icons material-icons-outlined">
             account_circle
           </i>
