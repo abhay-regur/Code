@@ -173,6 +173,8 @@ function Article(props) {
   const handleSubmit = (event) => {
     event.preventDefault();
     let comment = postComment;
+    setPostComment("");
+    let obj = Object.assign(comments);
     if (!isRunning && token) {
       setisRunning(true);
       axios
@@ -187,7 +189,8 @@ function Article(props) {
         )
         .then((Response) => {
           if (Response.status === 200) {
-            setComments(...comments, Response.data.comment);
+            obj.push(Response.data.comment);
+            setComments(obj);
             setisRunning(false);
           }
         })
@@ -346,6 +349,7 @@ function Article(props) {
                         placeholder="Write a comment..."
                         rows="3"
                         required
+                        value={postComment}
                         onChange={(e) => {
                           setPostComment(e.target.value);
                         }}
