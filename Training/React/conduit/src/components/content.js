@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import axios from "axios";
 
 export default function Content(props) {
-  const baseURL = "https://api.realworld.io";
+  const baseURL = process.env.REACT_APP_API_URL;
 
   const [isRunning, setisRunning] = useState(false);
   const [activeId, setActiveId] = useState();
@@ -69,16 +69,7 @@ export default function Content(props) {
   };
 
   const handleArticleChange = (article) => {
-    setarticleObj(
-      articleObj.map((ar) => {
-        return ar.slug === article.slug
-          ? { ...ar, favorited: article.favorited } && {
-              ...ar,
-              favoritesCount: article.favoritesCount,
-            }
-          : ar;
-      })
-    );
+    setarticleObj(article);
   };
 
   const handleClick = (event, type) => {
@@ -92,6 +83,7 @@ export default function Content(props) {
     event.stopPropagation();
     if (!isRunning) {
       if (token) {
+        let obj = Object.assign({}, articleObj);
         setisRunning(true);
         let followingStatus =
           event.currentTarget.classList.contains("btn-success-active");
@@ -107,7 +99,12 @@ export default function Content(props) {
             )
             .then((response) => {
               if (response.status === 200) {
-                handleArticleChange(response.data.article);
+                obj = Object.values(obj).filter((ob) => {
+                  return response.data.article.slug === ob.slug
+                    ? (ob = response.data.article)
+                    : ob;
+                });
+                handleArticleChange(obj);
                 setisRunning(false);
               }
             })
@@ -122,7 +119,12 @@ export default function Content(props) {
             })
             .then((response) => {
               if (response.status === 200) {
-                handleArticleChange(response.data.article);
+                obj = Object.values(obj).filter((ob) => {
+                  return response.data.article.slug === ob.slug
+                    ? (ob = response.data.article)
+                    : ob;
+                });
+                handleArticleChange(obj);
                 setisRunning(false);
               }
             })

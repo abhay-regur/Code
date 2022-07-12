@@ -13,7 +13,7 @@ import axios from "axios";
 
 function App() {
   const [username, setUsername] = useState("");
-  const baseURL = "https://api.realworld.io";
+  const baseURL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     let authToken = localStorage.getItem("jwtToken");

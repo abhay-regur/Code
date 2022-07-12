@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 function Editor(props) {
-  const baseURL = "https://api.realworld.io";
+  const baseURL = process.env.REACT_APP_API_URL;
   const [isRunning, setisRunning] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

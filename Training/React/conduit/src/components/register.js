@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 
 function Register() {
-  const baseURL = "https://api.realworld.io";
-  // const baseURL = "http://127.0.0.1:8000";
+  const baseURL = process.env.REACT_APP_API_URL;
   const [username, setUserName] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();

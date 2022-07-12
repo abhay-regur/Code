@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Profile(props) {
-  const baseURL = "https://api.realworld.io";
-  const defaultImage = "https://api.realworld.io/images/smiley-cyrus.jpeg";
+  const baseURL = process.env.REACT_APP_API_URL;
+  const defaultImage = process.env.REACT_APP_DEFAULT_IMG;
   const navigate = useNavigate();
   const [token, setToken] = useState("");
   const [activeId, setActiveId] = useState();

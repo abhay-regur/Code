@@ -27,8 +27,8 @@ function Article(props) {
 
   const [comments, setComments] = useState();
 
-  const baseURL = "https://api.realworld.io";
-  const defaultImage = "https://api.realworld.io/images/smiley-cyrus.jpeg";
+  const baseURL = process.env.REACT_APP_API_URL;
+  const defaultImage = process.env.REACT_APP_DEFAULT_IMG;
 
   useEffect(() => {
     let authToken = localStorage.getItem("jwtToken");
