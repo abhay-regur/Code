@@ -1,19 +1,26 @@
 import axios from "axios";
+import { GoogleLogin, GoogleLogout } from "react-google-login";
+import {
+  createLoginObject,
+  createGoogleOauthObject,
+} from "../services/loginServices";
 import React, { useState } from "react";
 
 function Login() {
   const baseURL = process.env.REACT_APP_API_URL;
+  const clientId = process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID;
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
   const [Error, setError] = useState("");
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    sendDataToDatabase(createLoginObject(username, password));
     setError("");
-    let user = {
-      email: username,
-      password: password,
-    };
+  };
+
+  const sendDataToDatabase = (profileDetailsObj) => {
+    let user = profileDetailsObj.user;
     axios
       .post(baseURL + "/api/users/login", { user }, {})
       .then((Response) => {
@@ -26,6 +33,11 @@ function Login() {
         setError(error);
         console.log(error);
       });
+  };
+
+  const responseGoogleOauth = (response) => {
+    console.log(response);
+    sendDataToDatabase(createGoogleOauthObject(response));
   };
 
   return (
@@ -61,10 +73,23 @@ function Login() {
                 />
                 <span className="password-error"></span>
               </fieldset>
-              <button className="btn btn-lg btn-primary pull-xs-right">
-                Sign up
+              <button className="btn btn-lg btn-success pull-xs-right">
+                Sign In
               </button>
             </form>
+            <div className="row">
+              <div className="col-md-12 text-center h5">Or</div>
+              <div className="col-md-12 text-center">
+                <GoogleLogin
+                  clientId={clientId}
+                  buttonText="Sign in with Google"
+                  onSuccess={responseGoogleOauth}
+                  onFailure={responseGoogleOauth}
+                  cookiePolicy={"single_host_origin"}
+                  isSignedIn={true}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

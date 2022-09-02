@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { updateFollowCount, updateFavoriteCount } from "../services/apiService";
 
 function Article(props) {
   const [token, setToken] = useState();
@@ -73,7 +74,7 @@ function Article(props) {
     setArticleupdated(true);
   }, [article]);
 
-  const handleFollow = (e) => {
+  const updateFollow = (e) => {
     e.preventDefault();
     if (!isRunning && token) {
       let obj = { ...article };
@@ -122,7 +123,7 @@ function Article(props) {
     e = null;
   };
 
-  const handleFavorite = (event) => {
+  const updateFavorite = (event) => {
     event.preventDefault();
     if (!isRunning && token) {
       let obj = { ...article };
@@ -256,7 +257,7 @@ function Article(props) {
                       ? "btn btn-sm btn-outline-secondary btn-secondary-active"
                       : "btn btn-sm btn-outline-secondary"
                   }
-                  onClick={(event) => handleFollow(event)}
+                  onClick={(event) => updateFollow(event)}
                 >
                   <i className="material-icons material-icons-outlined">add</i>
                   &nbsp; Follow {article.author.username}
@@ -268,7 +269,7 @@ function Article(props) {
                       ? "btn btn-sm btn-outline-success btn-success-active"
                       : "btn btn-sm btn-outline-success"
                   }
-                  onClick={(event) => handleFavorite(event)}
+                  onClick={(event) => updateFavorite(event)}
                 >
                   <i className="material-icons material-icons-outlined">
                     favorite
@@ -312,7 +313,7 @@ function Article(props) {
                       ? "btn btn-sm btn-outline-secondary btn-secondary-active"
                       : "btn btn-sm btn-outline-secondary"
                   }
-                  onClick={(event) => handleFollow(event)}
+                  onClick={(event) => updateFollow(event)}
                 >
                   <i className="material-icons material-icons-outlined">add</i>
                   &nbsp; Follow {article.author.username}
@@ -324,7 +325,7 @@ function Article(props) {
                       ? "btn btn-sm btn-outline-success btn-success-active"
                       : "btn btn-sm btn-outline-success"
                   }
-                  onClick={(event) => handleFavorite(event)}
+                  onClick={(event) => updateFavorite(event)}
                 >
                   <i className="material-icons material-icons-outlined">
                     favorite

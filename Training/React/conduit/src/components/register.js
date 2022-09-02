@@ -1,8 +1,15 @@
 import React, { useState } from "react";
+import { GoogleLogin, GoogleLogout } from "react-google-login";
+import { LocalStorage } from "../services/LocalStorage";
+import {
+  createGoogleOauthObject,
+  createRegistrationObject,
+} from "../services/registrationServices";
 import axios from "axios";
 
 function Register() {
   const baseURL = process.env.REACT_APP_API_URL;
+  const clientId = process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID;
   const [username, setUserName] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
@@ -32,23 +39,23 @@ function Register() {
   const handleResponse = (response) => {
     if (response.status === 200) {
       let userData = response.data.user;
-      console.log(userData);
-      localStorage.setItem("jwtToken", userData.token);
+      LocalStorage.set("jwtToken", userData.token);
       window.location.pathname = "/";
     }
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    sendDataToDatabase(createRegistrationObject(username, email, password));
     setuNameError("");
     setemailError("");
+  };
+
+  const sendDataToDatabase = (profileDetailsObj) => {
+    let user = profileDetailsObj.user;
     axios
       .post(baseURL + "/api/users", {
-        user: {
-          username: username,
-          email: email,
-          password: password,
-        },
+        user,
       })
       .then((response) => {
         handleResponse(response);
@@ -58,12 +65,20 @@ function Register() {
       });
   };
 
+  const responseGoogleOauth = (response) => {
+    // console.log(response);
+    if (typeof response == "object") {
+      console.log(createGoogleOauthObject(response));
+      sendDataToDatabase(createGoogleOauthObject(response));
+    }
+  };
+
   return (
     <div className="container">
       <div className="row">
         <div className="col-md-6 offset-md-3 col-xs-12">
-          <h1 className="text-center">Sign Up</h1>
-          <p className="text-center">
+          <h1 className="text-xs-center">Sign Up</h1>
+          <p className="text-xs-center">
             <a href="/login">Already have an account?</a>
           </p>
           <form className="form-group" onSubmit={handleSubmit}>
@@ -105,6 +120,19 @@ function Register() {
               value="Sign Up"
             />
           </form>
+          <div className="row">
+            <div className="col-md-12 text-center h5">Or</div>
+            <div className="col-md-12 text-center">
+              <GoogleLogin
+                clientId={clientId}
+                buttonText="Sign up with Google"
+                onSuccess={responseGoogleOauth}
+                onFailure={responseGoogleOauth}
+                cookiePolicy={"single_host_origin"}
+                isSignedIn={false}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

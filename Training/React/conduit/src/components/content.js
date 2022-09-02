@@ -156,6 +156,7 @@ export default function Content(props) {
     console.log(token);
     console.log(articleObj);
   };
+
   return (
     <div className="main main-wrapper">
       <Header />

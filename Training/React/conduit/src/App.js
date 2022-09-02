@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { initGoogleAPI } from "./services/googleAPIServices";
+import { LocalStorage } from "./services/LocalStorage";
+import { gapi } from "gapi-script";
 import Content from "./components/content";
 import Editor from "./components/editor";
 import Login from "./components/login";
@@ -16,7 +19,9 @@ function App() {
   const baseURL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
-    let authToken = localStorage.getItem("jwtToken");
+    gapi.load("client:auth2", initGoogleAPI); // Initalize Google API's
+
+    let authToken = LocalStorage.get("jwtToken");
     if (authToken) {
       axios
         .get(baseURL + "/api/user", {
