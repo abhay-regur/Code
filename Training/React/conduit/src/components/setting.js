@@ -1,5 +1,5 @@
 import React from "react";
-import { GoogleLogout } from "react-google-login";
+import { googleLogout } from "@react-oauth/google";
 import { LocalStorage } from "../services/LocalStorage";
 
 function Setting() {
@@ -7,6 +7,7 @@ function Setting() {
 
   const logoutHandler = () => {
     console.log("Logged Out");
+    googleLogout();
     LocalStorage.delete("jwtToken");
     window.location.pathname = "/";
   };
@@ -66,20 +67,9 @@ function Setting() {
                 buttonText="Logout"
                 onLogoutSuccess={logoutHandler}
               ></GoogleLogout> */}
-              <GoogleLogout
-                clientId={clientId}
-                render={(renderProps) => (
-                  <button
-                    className="btn btn-lg btn-danger"
-                    onClick={renderProps.onClick}
-                    disabled={renderProps.disabled}
-                  >
-                    Logout
-                  </button>
-                )}
-                buttonText="Logout"
-                onLogoutSuccess={logoutHandler}
-              />
+              <button className="btn btn-lg btn-danger" onClick={logoutHandler}>
+                Logout
+              </button>
             </div>
           </div>
         </div>

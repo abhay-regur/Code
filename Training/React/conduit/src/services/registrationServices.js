@@ -1,3 +1,4 @@
+import jwt from "jwt-decode";
 export const createGoogleOauthObject = (responseobj) => {
   let registrationObj = {
     user: {
@@ -8,9 +9,9 @@ export const createGoogleOauthObject = (responseobj) => {
   };
 
   if (typeof responseobj == "object") {
-    let profileObj = responseobj.profileObj;
+    let profileObj = jwt(responseobj.credential);
     registrationObj.user.username = profileObj.name.replace(" ", "_");
-    registrationObj.user.email = profileObj.email;
+    registrationObj.user.password = profileObj.jti;
     registrationObj.user.password = profileObj.googleId;
   }
   return registrationObj;

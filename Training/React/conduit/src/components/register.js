@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GoogleLogin, GoogleLogout } from "react-google-login";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { LocalStorage } from "../services/LocalStorage";
 import {
   createGoogleOauthObject,
@@ -39,7 +39,7 @@ function Register() {
   const handleResponse = (response) => {
     if (response.status === 200) {
       let userData = response.data.user;
-      LocalStorage.set("jwtToken", userData.token);
+      LocalStorage.set(userData.token);
       window.location.pathname = "/";
     }
   };
@@ -66,9 +66,8 @@ function Register() {
   };
 
   const responseGoogleOauth = (response) => {
-    // console.log(response);
     if (typeof response == "object") {
-      console.log(createGoogleOauthObject(response));
+      // console.log(response);
       sendDataToDatabase(createGoogleOauthObject(response));
     }
   };
@@ -123,14 +122,13 @@ function Register() {
           <div className="row">
             <div className="col-md-12 text-center h5">Or</div>
             <div className="col-md-12 text-center">
-              <GoogleLogin
-                clientId={clientId}
-                buttonText="Sign up with Google"
-                onSuccess={responseGoogleOauth}
-                onFailure={responseGoogleOauth}
-                cookiePolicy={"single_host_origin"}
-                isSignedIn={false}
-              />
+              <GoogleOAuthProvider clientId={clientId}>
+                <GoogleLogin
+                  onSuccess={responseGoogleOauth}
+                  onError={responseGoogleOauth}
+                  useOneTap
+                />
+              </GoogleOAuthProvider>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GoogleLogin, GoogleLogout } from "react-google-login";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import {
   createLoginObject,
   createGoogleOauthObject,
@@ -36,7 +36,7 @@ function Login() {
   };
 
   const responseGoogleOauth = (response) => {
-    console.log(response);
+    // console.log(response);
     sendDataToDatabase(createGoogleOauthObject(response));
   };
 
@@ -80,14 +80,13 @@ function Login() {
             <div className="row">
               <div className="col-md-12 text-center h5">Or</div>
               <div className="col-md-12 text-center">
-                <GoogleLogin
-                  clientId={clientId}
-                  buttonText="Sign in with Google"
-                  onSuccess={responseGoogleOauth}
-                  onFailure={responseGoogleOauth}
-                  cookiePolicy={"single_host_origin"}
-                  isSignedIn={true}
-                />
+                <GoogleOAuthProvider clientId={clientId}>
+                  <GoogleLogin
+                    onSuccess={responseGoogleOauth}
+                    onError={responseGoogleOauth}
+                    useOneTap
+                  />
+                </GoogleOAuthProvider>
               </div>
             </div>
           </div>
