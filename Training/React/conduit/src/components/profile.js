@@ -2,12 +2,12 @@ import axios from "axios";
 import ArticlePreview from "./articlepreview.js";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LocalStorage } from "../services/LocalStorage.js";
 
 function Profile(props) {
   const baseURL = process.env.REACT_APP_API_URL;
   const defaultImage = process.env.REACT_APP_DEFAULT_IMG;
   const navigate = useNavigate();
-  const [token, setToken] = useState("");
   const [activeId, setActiveId] = useState();
   const [isUser, setisUser] = useState(false);
   const [isRunning, setisRunning] = useState(false);
@@ -16,26 +16,26 @@ function Profile(props) {
   const [profileData, setProfileData] = useState({});
 
   useEffect(() => {
-    let authToken = localStorage.getItem("jwtToken");
+    let authToken = LocalStorage.get("jwtToken");
     let name = window.location.pathname.split("@").pop();
     setActiveId("myArticle");
     setisUser(name === props.username ? true : false);
-    setToken(authToken);
     getprofileDetails(name);
   }, []);
 
   const getprofileDetails = (name) => {
+    let authToken = LocalStorage.get("jwtToken");
     if (!isRunning) {
       setisRunning(true);
       axios
         .get(baseURL + "/api/profiles/" + name, {
-          headers: { Authorization: `Token ${token}` },
+          headers: { Authorization: `Token ${authToken}` },
         })
         .then((Response) => {
           if (Response.status === 200) {
             setProfileData(Response.data.profile);
             getArticles(
-              token,
+              authToken,
               baseURL + "/api/articles?author=" + profileData.username + "&"
             );
             setisRunning(false);
@@ -71,7 +71,8 @@ function Profile(props) {
 
   const handleFollow = (e) => {
     e.preventDefault();
-    if (!isRunning && token) {
+    let authToken = LocalStorage.get("jwtToken");
+    if (!isRunning) {
       let obj = { ...profileData };
       setisRunning(true);
       if (!e.target.classList.contains("btn-secondary-active")) {
@@ -80,7 +81,7 @@ function Profile(props) {
             baseURL + "/api/profiles/" + profileData.username + "/follow",
             {},
             {
-              headers: { Authorization: `Token ${token}` },
+              headers: { Authorization: `Token ${authToken}` },
             }
           )
           .then((Response) => {
@@ -99,7 +100,7 @@ function Profile(props) {
           .delete(
             baseURL + "/api/profiles/" + profileData.username + "/follow",
             {
-              headers: { Authorization: `Token ${token}` },
+              headers: { Authorization: `Token ${authToken}` },
             }
           )
           .then((Response) => {
@@ -120,8 +121,9 @@ function Profile(props) {
 
   const handleClick = (event, type) => {
     event.stopPropagation();
+    let authToken = LocalStorage.get("jwtToken");
     setActiveId(event.target.id);
-    getArticles(token, baseURL + type);
+    getArticles(authToken, baseURL + type);
   };
 
   const handleArticleChange = (article) => {
@@ -140,8 +142,9 @@ function Profile(props) {
   const handleBtnClick = (event, key) => {
     event.preventDefault();
     event.stopPropagation();
+    let authToken = LocalStorage.get("jwtToken");
     if (!isRunning) {
-      if (token) {
+      if (authToken) {
         setisRunning(true);
         let followingStatus =
           event.currentTarget.classList.contains("btn-success-active");
@@ -152,7 +155,7 @@ function Profile(props) {
               baseURL + "/api/articles/" + key + "/favorite",
               {},
               {
-                headers: { Authorization: `Token ${token}` },
+                headers: { Authorization: `Token ${authToken}` },
               }
             )
             .then((response) => {
@@ -168,7 +171,7 @@ function Profile(props) {
         } else {
           axios
             .delete(baseURL + "/api/articles/" + key + "/favorite", {
-              headers: { Authorization: `Token ${token}` },
+              headers: { Authorization: `Token ${authToken}` },
             })
             .then((response) => {
               if (response.status === 200) {

@@ -73,14 +73,6 @@ function Editor(props) {
     }
   };
 
-  const handleLogout = (event) => {
-    event.preventDefault();
-    if (!isRunning) {
-      localStorage.removeItem("jwtToken");
-      window.location.pathname = "/";
-    }
-  };
-
   return (
     <div className="editor-page container">
       <div className="row">
@@ -154,23 +146,6 @@ function Editor(props) {
               </button>
             </div>
           </form>
-        </div>
-        <div className="col-md-10 offset-md-1 col-xs-12">
-          {token ? (
-            <>
-              <hr />
-              <div className="logout-wrapper">
-                <button
-                  className="btn btn-outline-danger"
-                  onClick={(e) => handleLogout(e)}
-                >
-                  Logout
-                </button>
-              </div>
-            </>
-          ) : (
-            <></>
-          )}
         </div>
       </div>
     </div>

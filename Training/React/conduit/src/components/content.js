@@ -4,6 +4,7 @@ import TagList from "./taglist.js";
 import ArticlePreview from "./articlepreview.js";
 import PropTypes from "prop-types";
 import axios from "axios";
+import { LocalStorage } from "../services/LocalStorage";
 
 export default function Content(props) {
   const baseURL = process.env.REACT_APP_API_URL;
@@ -18,7 +19,7 @@ export default function Content(props) {
   const [articleCount, setArticleCount] = useState();
 
   useEffect(() => {
-    let authToken = localStorage.getItem("jwtToken");
+    let authToken = LocalStorage.get("jwtToken");
     if (authToken) {
       getArticles(authToken, baseURL + "/api/articles/feed?");
       setActiveId("feedBtn");
@@ -27,24 +28,7 @@ export default function Content(props) {
       setActiveId("globalBtn");
     }
     setToken(authToken);
-
-    if (!isRunning) {
-      setisRunning(true);
-      axios
-        .get(baseURL + "/api/tags", {
-          headers: { Authorization: `Token ${authToken || ""}` },
-        })
-        .then((response) => {
-          if (response.status === 200) {
-            setisRunning(false);
-            settagItemsList(response.data.tags);
-          }
-        })
-        .catch((error) => {
-          setisRunning(false);
-          console.log(error);
-        });
-    }
+    getTagsFromdb(authToken);
   }, []);
 
   const getArticles = (token, url) => {
@@ -59,6 +43,27 @@ export default function Content(props) {
             setisRunning(false);
             setarticleObj(response.data.articles);
             setArticleCount(response.data.articlesCount);
+          }
+        })
+        .catch((error) => {
+          setisRunning(false);
+          console.log(error);
+        });
+    }
+  };
+
+  const getTagsFromdb = (token) => {
+    console.log(token);
+    if (!isRunning) {
+      setisRunning(true);
+      axios
+        .get(baseURL + "/api/tags", {
+          headers: { Authorization: `Token ${token || ""}` },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            setisRunning(false);
+            settagItemsList(response.data.tags);
           }
         })
         .catch((error) => {

@@ -16,6 +16,7 @@ import axios from "axios";
 
 function App() {
   const [username, setUsername] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const baseURL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
@@ -30,6 +31,7 @@ function App() {
         .then((Response) => {
           if (Response.status === 200) {
             setUsername(Response.data.user.username);
+            setUserEmail(Response.data.user.email);
           }
         })
         .catch((error) => {
@@ -54,7 +56,10 @@ function App() {
         <Route path="/article" element={<Article username={username} />}>
           <Route path=":articleSlug" element={<Article />} />
         </Route>
-        <Route path="/setting" element={<Setting username={username} />} />
+        <Route
+          path="/setting"
+          element={<Setting username={username} email={userEmail} />}
+        />
         <Route path="/profile" element={<Profile username={username} />}>
           <Route path=":Username" element={<Profile />} />
         </Route>
