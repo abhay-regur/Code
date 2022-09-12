@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { updateFollowCount, updateFavoriteCount } from "../services/apiService";
+import { LocalStorage } from "../services/LocalStorage";
 
 function Article(props) {
   const [token, setToken] = useState();
@@ -30,9 +30,9 @@ function Article(props) {
 
   const baseURL = process.env.REACT_APP_API_URL;
   const defaultImage = process.env.REACT_APP_DEFAULT_IMG;
+  const authToken = LocalStorage.get("jwtToken");
 
   useEffect(() => {
-    let authToken = localStorage.getItem("jwtToken");
     let slug = window.location.pathname.split("/").pop();
     let obj = { ...article };
     if (!isRunning && slug) {
@@ -56,17 +56,7 @@ function Article(props) {
           setisRunning(false);
         });
       obj = null;
-
-      axios
-        .get(baseURL + "/api/articles/" + slug + "/comments", {
-          headers: { Authorization: `Token ${authToken || ""}` },
-        })
-        .then((Response) => {
-          if (Response.status === 200) {
-            obj = Object.assign(Response.data.comments);
-            setComments(obj);
-          }
-        });
+      getComments(slug);
     }
   }, []);
 
@@ -171,11 +161,24 @@ function Article(props) {
     event = null;
   };
 
+  const getComments = (slug) => {
+    axios
+      .get(baseURL + "/api/articles/" + slug + "/comments", {
+        headers: { Authorization: `Token ${authToken || ""}` },
+      })
+      .then((Response) => {
+        if (Response.status === 200) {
+          let obj = Object.assign(Response.data.comments);
+          setComments(obj);
+        }
+      });
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     let comment = postComment;
     setPostComment("");
-    let obj = Object.assign(comments);
+    // let obj = { ...comments };
     if (!isRunning && token) {
       setisRunning(true);
       axios
@@ -189,9 +192,10 @@ function Article(props) {
           }
         )
         .then((Response) => {
-          if (Response.status === 200) {
-            obj.push(Response.data.comment);
-            setComments(obj);
+          console.log(Response);
+          if (Response.status === 201 || Response.status === 200) {
+            getComments(window.location.pathname.split("/").pop());
+            // setComments(obj);
             setisRunning(false);
           }
         })
@@ -236,7 +240,9 @@ function Article(props) {
               <div className="article-meta">
                 <a href={"/profile/" + article.author.username}>
                   <img
-                    src={article.author.image || { defaultImage }}
+                    src={
+                      article.author.image ? article.author.image : defaultImage
+                    }
                     alt={article.author.username}
                   />
                 </a>
@@ -251,32 +257,42 @@ function Article(props) {
                     {new Date(article.createdAt).toDateString()}
                   </time>
                 </div>
-                <button
-                  className={
-                    article.author.following
-                      ? "btn btn-sm btn-outline-secondary btn-secondary-active"
-                      : "btn btn-sm btn-outline-secondary"
-                  }
-                  onClick={(event) => updateFollow(event)}
-                >
-                  <i className="material-icons material-icons-outlined">add</i>
-                  &nbsp; Follow {article.author.username}
-                </button>
-                &nbsp;&nbsp;
-                <button
-                  className={
-                    article.favorited
-                      ? "btn btn-sm btn-outline-success btn-success-active"
-                      : "btn btn-sm btn-outline-success"
-                  }
-                  onClick={(event) => updateFavorite(event)}
-                >
-                  <i className="material-icons material-icons-outlined">
-                    favorite
-                  </i>
-                  &nbsp; Favorite Post{" "}
-                  <span className="counter">({article.favoritesCount})</span>
-                </button>
+                {article.author.username !== props.username ? (
+                  <span>
+                    <button
+                      className={
+                        article.author.following
+                          ? "btn btn-sm btn-outline-secondary btn-secondary-active"
+                          : "btn btn-sm btn-outline-secondary"
+                      }
+                      onClick={(event) => updateFollow(event)}
+                    >
+                      <i className="material-icons material-icons-outlined">
+                        add
+                      </i>
+                      &nbsp; Follow {article.author.username}
+                    </button>
+                    &nbsp;&nbsp;
+                    <button
+                      className={
+                        article.favorited
+                          ? "btn btn-sm btn-outline-success btn-success-active"
+                          : "btn btn-sm btn-outline-success"
+                      }
+                      onClick={(event) => updateFavorite(event)}
+                    >
+                      <i className="material-icons material-icons-outlined">
+                        favorite
+                      </i>
+                      &nbsp; Favorite Post{" "}
+                      <span className="counter">
+                        ({article.favoritesCount})
+                      </span>
+                    </button>
+                  </span>
+                ) : (
+                  <span></span>
+                )}
               </div>
             </div>
           </div>
@@ -295,7 +311,9 @@ function Article(props) {
               <div className="article-meta">
                 <a href={"/profile/" + article.author.username}>
                   <img
-                    src={article.author.image || { defaultImage }}
+                    src={
+                      article.author.image ? article.author.image : defaultImage
+                    }
                     alt={article.author.name}
                   />
                 </a>
@@ -307,32 +325,42 @@ function Article(props) {
                     {new Date(article.createdAt).toDateString()}
                   </time>
                 </div>
-                <button
-                  className={
-                    article.author.following
-                      ? "btn btn-sm btn-outline-secondary btn-secondary-active"
-                      : "btn btn-sm btn-outline-secondary"
-                  }
-                  onClick={(event) => updateFollow(event)}
-                >
-                  <i className="material-icons material-icons-outlined">add</i>
-                  &nbsp; Follow {article.author.username}
-                </button>
-                &nbsp;
-                <button
-                  className={
-                    article.favorited
-                      ? "btn btn-sm btn-outline-success btn-success-active"
-                      : "btn btn-sm btn-outline-success"
-                  }
-                  onClick={(event) => updateFavorite(event)}
-                >
-                  <i className="material-icons material-icons-outlined">
-                    favorite
-                  </i>
-                  &nbsp; Favorite Post{" "}
-                  <span className="counter">({article.favoritesCount})</span>
-                </button>
+                {article.author.username !== props.username ? (
+                  <span>
+                    <button
+                      className={
+                        article.author.following
+                          ? "btn btn-sm btn-outline-secondary btn-secondary-active"
+                          : "btn btn-sm btn-outline-secondary"
+                      }
+                      onClick={(event) => updateFollow(event)}
+                    >
+                      <i className="material-icons material-icons-outlined">
+                        add
+                      </i>
+                      &nbsp; Follow {article.author.username}
+                    </button>
+                    &nbsp;
+                    <button
+                      className={
+                        article.favorited
+                          ? "btn btn-sm btn-outline-success btn-success-active"
+                          : "btn btn-sm btn-outline-success"
+                      }
+                      onClick={(event) => updateFavorite(event)}
+                    >
+                      <i className="material-icons material-icons-outlined">
+                        favorite
+                      </i>
+                      &nbsp; Favorite Post{" "}
+                      <span className="counter">
+                        ({article.favoritesCount})
+                      </span>
+                    </button>
+                  </span>
+                ) : (
+                  <span></span>
+                )}
               </div>
             </div>
 
@@ -358,7 +386,11 @@ function Article(props) {
                     </div>
                     <div className="card-footer">
                       <img
-                        src={article.author.image || { defaultImage }}
+                        src={
+                          article.author.image
+                            ? article.author.image
+                            : defaultImage
+                        }
                         alt={article.author.name}
                         className="comment-author-img"
                       />

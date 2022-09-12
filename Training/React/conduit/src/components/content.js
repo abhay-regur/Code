@@ -53,7 +53,6 @@ export default function Content(props) {
   };
 
   const getTagsFromdb = (token) => {
-    console.log(token);
     if (!isRunning) {
       setisRunning(true);
       axios
@@ -150,16 +149,6 @@ export default function Content(props) {
     setActiveId("tagBbtn");
     getArticles(token, baseURL + "/api/articles?tag=" + tag + "&");
     setselectedTag(tag);
-  };
-
-  const debugme = (event) => {
-    event.preventDefault();
-    console.log(isRunning);
-    console.log(activeId);
-    console.log(selectedTag);
-    console.log(tagItemsList);
-    console.log(token);
-    console.log(articleObj);
   };
 
   return (

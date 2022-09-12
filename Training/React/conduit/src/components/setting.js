@@ -28,7 +28,6 @@ function Setting(props) {
         .then((response) => {
           if (response.status === 200) {
             setisRunning(false);
-            console.log(response.data.profile);
             setValuesToInput(response.data);
           }
         })

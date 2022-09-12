@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 function Articlepreview(props) {
   const navigate = useNavigate();
+  const defaultImage = process.env.REACT_APP_DEFAULT_IMG;
   const handleLink = (event, author) => {
     event.preventDefault();
     navigate("/profile/@" + author);
@@ -23,7 +24,9 @@ function Articlepreview(props) {
               >
                 <img
                   className="userImage"
-                  src={article.author.image}
+                  src={
+                    article.author.image ? article.author.image : defaultImage
+                  }
                   alt={article.author.username}
                 />
                 <div className="user-info">

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { LocalStorage } from "../services/LocalStorage";
 
 function Editor(props) {
   const baseURL = process.env.REACT_APP_API_URL;
@@ -12,7 +13,7 @@ function Editor(props) {
   const [tagList, setTagList] = useState([]);
 
   useEffect(() => {
-    setToken(localStorage.getItem("jwtToken"));
+    setToken(LocalStorage.get("jwtToken"));
   }, []);
 
   const changeTagInput = (event) => {
@@ -25,12 +26,10 @@ function Editor(props) {
 
       if (tagInput && !tagList.includes(tagInput)) {
         var tempTagarr = tagInput.split(",");
-        console.log(tempTagarr);
         tempTagarr.map((tempTag) =>
           setTagList((tagList) => [...tagList, tempTag])
         );
       }
-      console.log(tagList);
       setTagInput("");
     }
   };
