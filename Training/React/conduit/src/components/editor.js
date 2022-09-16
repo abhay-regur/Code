@@ -1,29 +1,56 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { LocalStorage } from "../services/LocalStorage";
 
 function Editor(props) {
   const baseURL = process.env.REACT_APP_API_URL;
+  const navigate = useNavigate();
   const [isRunning, setisRunning] = useState(false);
+  const [isEditMode, setisEditMode] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [body, setBody] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [token, setToken] = useState("");
   const [tagList, setTagList] = useState([]);
+  const [article, setArticle] = useState({});
 
   useEffect(() => {
     setToken(LocalStorage.get("jwtToken"));
+    if (window.location.hash !== "") {
+      setisEditMode(true);
+      getArticleData(window.location.hash.split("#").pop());
+    }
   }, []);
 
   const changeTagInput = (event) => {
     setTagInput(event.target.value);
   };
+  const getArticleData = (slug) => {
+    axios
+      .get(baseURL + "/api/articles/" + slug, {
+        headers: { Authorization: `Token ${token || ""}` },
+      })
+      .then((Response) => {
+        if (Response.status === 200) {
+          let obj = Object.assign(Response.data.article);
+          setArticle(obj);
+          setBody(obj.body);
+          setDescription(obj.description);
+          setTitle(obj.title);
+          setTagList(obj.tagList);
+        }
+      })
+      .catch((error) => {
+        setisRunning(false);
+        console.log(error);
+      });
+  };
 
   const addTag = (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
-
       if (tagInput && !tagList.includes(tagInput)) {
         var tempTagarr = tagInput.split(",");
         tempTagarr.map((tempTag) =>
@@ -49,10 +76,33 @@ function Editor(props) {
       tagList: tagList,
     };
 
-    if (!isRunning) {
+    if (!isRunning && !isEditMode) {
       axios
         .post(
           url,
+          { article: articleData },
+          {
+            headers: { Authorization: `Token ${token}` },
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          if (response.status === 200 || response.status === 201) {
+            slug = response.data.article.slug;
+            window.location.pathname = "/article/" + slug;
+            navigate("/", {});
+            setisRunning(false);
+          }
+        })
+        .catch((error) => {
+          setisRunning(false);
+          console.log(error);
+        });
+    } else if (!isRunning && isEditMode) {
+      let slug = window.location.hash.split("#").pop();
+      axios
+        .put(
+          url + "/" + slug,
           { article: articleData },
           {
             headers: { Authorization: `Token ${token}` },
@@ -119,7 +169,7 @@ function Editor(props) {
                   onKeyUp={addTag}
                 />
 
-                <div className="tag-list">
+                <div className="tag-list editor-tag-pill">
                   {tagList.map((tag) => {
                     return (
                       <span className="tag-default tag-pill" key={tag}>

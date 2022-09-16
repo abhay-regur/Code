@@ -1,8 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { LocalStorage } from "../services/LocalStorage";
 
 function Article(props) {
+  const navigate = useNavigate();
   const [token, setToken] = useState();
   const [articleSlug, setArticleSlug] = useState();
   const [postComment, setPostComment] = useState();
@@ -228,6 +230,35 @@ function Article(props) {
     }
   };
 
+  const editArticle = (event) => {
+    event.preventDefault();
+    let slug = window.location.pathname.split("/").pop();
+    navigate("/newArticle/#" + slug, {});
+  };
+
+  const removeArticlefrom = (event) => {
+    event.preventDefault();
+    let slug = window.location.pathname.split("/").pop();
+    if (!isRunning && slug) {
+      setisRunning(true);
+      axios
+        .delete(baseURL + "/api/articles/" + slug, {
+          headers: { Authorization: `Token ${authToken || ""}` },
+        })
+        .then((Response) => {
+          if (Response.status === 200) {
+            setisRunning(false);
+            setArticleSlug("");
+            navigate("/", {});
+          }
+        })
+        .catch((error) => {
+          console.log(error.message);
+          setisRunning(false);
+        });
+    }
+  };
+
   return (
     <div className="main article-wrapper">
       {/* <button onClick={(e) => debugger_(e)}>debugger</button> */}
@@ -291,7 +322,26 @@ function Article(props) {
                     </button>
                   </span>
                 ) : (
-                  <span></span>
+                  <span>
+                    <button
+                      className="btn btn-sm btn-outline-secondary btn-edit-article"
+                      onClick={(event) => editArticle(event)}
+                    >
+                      <i className="material-icons material-icons-outlined">
+                        edit
+                      </i>
+                      &nbsp;Edit Post
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-danger btn-edit-article ml-3"
+                      onClick={(event) => removeArticlefrom(event)}
+                    >
+                      <i className="material-icons material-icons-outlined">
+                        delete
+                      </i>
+                      &nbsp;Delete
+                    </button>
+                  </span>
                 )}
               </div>
             </div>

@@ -50,6 +50,7 @@ function Setting(props) {
   const updateUserDetails = (event) => {
     event.preventDefault();
     let authToken = LocalStorage.get("jwtToken");
+    console.log(imageUrl);
     if (!isRunning) {
       axios
         .put(

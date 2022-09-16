@@ -10,9 +10,10 @@ export const createGoogleOauthObject = (responseobj) => {
 
   if (typeof responseobj == "object") {
     let profileObj = jwt(responseobj.credential);
+    console.log(profileObj);
     registrationObj.user.username = profileObj.name.replace(" ", "_");
     registrationObj.user.password = profileObj.jti;
-    registrationObj.user.password = profileObj.googleId;
+    registrationObj.user.email = profileObj.email;
   }
   return registrationObj;
 };
