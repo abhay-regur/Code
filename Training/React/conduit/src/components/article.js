@@ -2,9 +2,11 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { LocalStorage } from "../services/LocalStorage";
+import LoadingOverlay from "react-loading-overlay";
 
 function Article(props) {
   const navigate = useNavigate();
+  const [isLoading, setisLoading] = useState(true);
   const [token, setToken] = useState();
   const [articleSlug, setArticleSlug] = useState();
   const [postComment, setPostComment] = useState();
@@ -50,6 +52,7 @@ function Article(props) {
             setisRunning(false);
             setArticleSlug(slug);
             setToken(authToken);
+            setisLoading(false);
           }
         })
         .catch((error) => {
@@ -238,6 +241,7 @@ function Article(props) {
 
   const removeArticlefrom = (event) => {
     event.preventDefault();
+    setisLoading(true);
     let slug = window.location.pathname.split("/").pop();
     if (!isRunning && slug) {
       setisRunning(true);
@@ -250,273 +254,292 @@ function Article(props) {
             setisRunning(false);
             setArticleSlug("");
             navigate("/", {});
+            setisLoading(false);
           }
         })
         .catch((error) => {
           console.log(error.message);
           setisRunning(false);
+          setisLoading(false);
         });
     }
   };
 
   return (
-    <div className="main article-wrapper">
-      {/* <button onClick={(e) => debugger_(e)}>debugger</button> */}
-      {articleUpdated ? (
-        <div className="article-page">
-          <div className="banner">
-            <div className="container">
-              <h1>{article.title || ""}</h1>
+    <LoadingOverlay
+      active={isLoading}
+      spinner
+      text="Loading article..."
+      styles={{
+        overlay: (base) => ({
+          ...base,
+          background: "rgba(0, 0, 0, 0.9)",
+        }),
+      }}
+    >
+      <div className="main article-wrapper">
+        {/* <button onClick={(e) => debugger_(e)}>debugger</button> */}
+        {articleUpdated ? (
+          <div className="article-page">
+            <div className="banner">
+              <div className="container">
+                <h1>{article.title || ""}</h1>
 
-              <div className="article-meta">
-                <a href={"/profile/" + article.author.username}>
-                  <img
-                    src={
-                      article.author.image ? article.author.image : defaultImage
-                    }
-                    alt={article.author.username}
-                  />
-                </a>
-                <div className="info">
-                  <a
-                    href={"/profile/" + article.author.username}
-                    className="author"
-                  >
-                    {article.author.username}
+                <div className="article-meta">
+                  <a href={"/profile/" + article.author.username}>
+                    <img
+                      src={
+                        article.author.image
+                          ? article.author.image
+                          : defaultImage
+                      }
+                      alt={article.author.username}
+                    />
                   </a>
-                  <time className="date" dateTime={article.createdAt}>
-                    {new Date(article.createdAt).toDateString()}
-                  </time>
-                </div>
-                {article.author.username !== props.username ? (
-                  <span>
-                    <button
-                      className={
-                        article.author.following
-                          ? "btn btn-sm btn-outline-secondary btn-secondary-active"
-                          : "btn btn-sm btn-outline-secondary"
-                      }
-                      onClick={(event) => updateFollow(event)}
+                  <div className="info">
+                    <a
+                      href={"/profile/" + article.author.username}
+                      className="author"
                     >
-                      <i className="material-icons material-icons-outlined">
-                        add
-                      </i>
-                      &nbsp; Follow {article.author.username}
-                    </button>
-                    &nbsp;&nbsp;
-                    <button
-                      className={
-                        article.favorited
-                          ? "btn btn-sm btn-outline-success btn-success-active"
-                          : "btn btn-sm btn-outline-success"
-                      }
-                      onClick={(event) => updateFavorite(event)}
-                    >
-                      <i className="material-icons material-icons-outlined">
-                        favorite
-                      </i>
-                      &nbsp; Favorite Post{" "}
-                      <span className="counter">
-                        ({article.favoritesCount})
-                      </span>
-                    </button>
-                  </span>
-                ) : (
-                  <span>
-                    <button
-                      className="btn btn-sm btn-outline-secondary btn-edit-article"
-                      onClick={(event) => editArticle(event)}
-                    >
-                      <i className="material-icons material-icons-outlined">
-                        edit
-                      </i>
-                      &nbsp;Edit Post
-                    </button>
-                    <button
-                      className="btn btn-sm btn-outline-danger btn-edit-article ml-3"
-                      onClick={(event) => removeArticlefrom(event)}
-                    >
-                      <i className="material-icons material-icons-outlined">
-                        delete
-                      </i>
-                      &nbsp;Delete
-                    </button>
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="container page">
-            <div className="row article-content">
-              <div className="col-md-12">
-                <p>{article.description}</p>
-                <p>{article.body}</p>
-              </div>
-            </div>
-
-            <hr />
-
-            <div className="article-actions">
-              <div className="article-meta">
-                <a href={"/profile/" + article.author.username}>
-                  <img
-                    src={
-                      article.author.image ? article.author.image : defaultImage
-                    }
-                    alt={article.author.name}
-                  />
-                </a>
-                <div className="info">
-                  <a href={"/profile/" + article.username} className="author">
-                    {article.author.username}
-                  </a>
-                  <time className="date" dateTime={article.createdAt}>
-                    {new Date(article.createdAt).toDateString()}
-                  </time>
-                </div>
-                {article.author.username !== props.username ? (
-                  <span>
-                    <button
-                      className={
-                        article.author.following
-                          ? "btn btn-sm btn-outline-secondary btn-secondary-active"
-                          : "btn btn-sm btn-outline-secondary"
-                      }
-                      onClick={(event) => updateFollow(event)}
-                    >
-                      <i className="material-icons material-icons-outlined">
-                        add
-                      </i>
-                      &nbsp; Follow {article.author.username}
-                    </button>
-                    &nbsp;
-                    <button
-                      className={
-                        article.favorited
-                          ? "btn btn-sm btn-outline-success btn-success-active"
-                          : "btn btn-sm btn-outline-success"
-                      }
-                      onClick={(event) => updateFavorite(event)}
-                    >
-                      <i className="material-icons material-icons-outlined">
-                        favorite
-                      </i>
-                      &nbsp; Favorite Post{" "}
-                      <span className="counter">
-                        ({article.favoritesCount})
-                      </span>
-                    </button>
-                  </span>
-                ) : (
-                  <span></span>
-                )}
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-xs-12 col-md-8 offset-md-2">
-                {token ? (
-                  <form
-                    className="card comment-form"
-                    onSubmit={(event) => handleSubmit(event)}
-                  >
-                    <div className="card-block">
-                      <textarea
-                        className="form-control"
-                        name="commentArea"
-                        placeholder="Write a comment..."
-                        rows="3"
-                        required
-                        value={postComment}
-                        onChange={(e) => {
-                          setPostComment(e.target.value);
-                        }}
-                      ></textarea>
-                    </div>
-                    <div className="card-footer">
-                      <img
-                        src={
-                          article.author.image
-                            ? article.author.image
-                            : defaultImage
-                        }
-                        alt={article.author.name}
-                        className="comment-author-img"
-                      />
-                      <button className="btn btn-sm btn-success">
-                        Post Comment
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="no-token-request">
-                    <a href="/login">Sign in</a> or{" "}
-                    <a href="/register">Sign Up</a> to comment on this article.
+                      {article.author.username}
+                    </a>
+                    <time className="date" dateTime={article.createdAt}>
+                      {new Date(article.createdAt).toDateString()}
+                    </time>
                   </div>
-                )}
-                {comments ? (
-                  comments.map((comment) => {
-                    return (
-                      <div className="card" key={comment.id}>
-                        <div className="card-block">
-                          <p className="card-text">{comment.body}</p>
-                        </div>
-                        <div className="card-footer">
-                          <a
-                            href={"/profile/" + comment.author.username}
-                            className="comment-author"
-                          >
-                            <img
-                              src={comment.author.image || defaultImage}
-                              className="comment-author-img"
-                              alt={comment.author.username}
-                            />
-                          </a>
-                          &nbsp;
-                          <a
-                            href={"/profile/" + comment.author.username}
-                            className="comment-author"
-                          >
-                            &nbsp;
-                            {comment.author.username}
-                          </a>
-                          &nbsp;
-                          <time
-                            className="date-posted"
-                            dateTime={article.createdAt}
-                          >
-                            {new Date(comment.createdAt).toDateString()}
-                          </time>
-                          {props.username === comment.author.username ? (
-                            <span
-                              className="comment-delete float-right"
-                              onClick={(e) => {
-                                handleDelete(e, comment.id);
-                              }}
-                            >
-                              <i className="material-icons material-icons-outlined">
-                                delete
-                              </i>
-                            </span>
-                          ) : (
-                            <></>
-                          )}
-                        </div>
+                  {article.author.username !== props.username ? (
+                    <span>
+                      <button
+                        className={
+                          article.author.following
+                            ? "btn btn-sm btn-outline-secondary btn-secondary-active"
+                            : "btn btn-sm btn-outline-secondary"
+                        }
+                        onClick={(event) => updateFollow(event)}
+                      >
+                        <i className="material-icons material-icons-outlined">
+                          add
+                        </i>
+                        &nbsp; Follow {article.author.username}
+                      </button>
+                      &nbsp;&nbsp;
+                      <button
+                        className={
+                          article.favorited
+                            ? "btn btn-sm btn-outline-success btn-success-active"
+                            : "btn btn-sm btn-outline-success"
+                        }
+                        onClick={(event) => updateFavorite(event)}
+                      >
+                        <i className="material-icons material-icons-outlined">
+                          favorite
+                        </i>
+                        &nbsp; Favorite Post{" "}
+                        <span className="counter">
+                          ({article.favoritesCount})
+                        </span>
+                      </button>
+                    </span>
+                  ) : (
+                    <span>
+                      <button
+                        className="btn btn-sm btn-outline-secondary btn-edit-article"
+                        onClick={(event) => editArticle(event)}
+                      >
+                        <i className="material-icons material-icons-outlined">
+                          edit
+                        </i>
+                        &nbsp;Edit Post
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-danger btn-edit-article ml-3"
+                        onClick={(event) => removeArticlefrom(event)}
+                      >
+                        <i className="material-icons material-icons-outlined">
+                          delete
+                        </i>
+                        &nbsp;Delete
+                      </button>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="container page">
+              <div className="row article-content">
+                <div className="col-md-12">
+                  <p>{article.description}</p>
+                  <p>{article.body}</p>
+                </div>
+              </div>
+
+              <hr />
+
+              <div className="article-actions">
+                <div className="article-meta">
+                  <a href={"/profile/" + article.author.username}>
+                    <img
+                      src={
+                        article.author.image
+                          ? article.author.image
+                          : defaultImage
+                      }
+                      alt={article.author.name}
+                    />
+                  </a>
+                  <div className="info">
+                    <a href={"/profile/" + article.username} className="author">
+                      {article.author.username}
+                    </a>
+                    <time className="date" dateTime={article.createdAt}>
+                      {new Date(article.createdAt).toDateString()}
+                    </time>
+                  </div>
+                  {article.author.username !== props.username ? (
+                    <span>
+                      <button
+                        className={
+                          article.author.following
+                            ? "btn btn-sm btn-outline-secondary btn-secondary-active"
+                            : "btn btn-sm btn-outline-secondary"
+                        }
+                        onClick={(event) => updateFollow(event)}
+                      >
+                        <i className="material-icons material-icons-outlined">
+                          add
+                        </i>
+                        &nbsp; Follow {article.author.username}
+                      </button>
+                      &nbsp;
+                      <button
+                        className={
+                          article.favorited
+                            ? "btn btn-sm btn-outline-success btn-success-active"
+                            : "btn btn-sm btn-outline-success"
+                        }
+                        onClick={(event) => updateFavorite(event)}
+                      >
+                        <i className="material-icons material-icons-outlined">
+                          favorite
+                        </i>
+                        &nbsp; Favorite Post{" "}
+                        <span className="counter">
+                          ({article.favoritesCount})
+                        </span>
+                      </button>
+                    </span>
+                  ) : (
+                    <span></span>
+                  )}
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="col-xs-12 col-md-8 offset-md-2">
+                  {token ? (
+                    <form
+                      className="card comment-form"
+                      onSubmit={(event) => handleSubmit(event)}
+                    >
+                      <div className="card-block">
+                        <textarea
+                          className="form-control"
+                          name="commentArea"
+                          placeholder="Write a comment..."
+                          rows="3"
+                          required
+                          value={postComment}
+                          onChange={(e) => {
+                            setPostComment(e.target.value);
+                          }}
+                        ></textarea>
                       </div>
-                    );
-                  })
-                ) : (
-                  <></>
-                )}
+                      <div className="card-footer">
+                        <img
+                          src={
+                            article.author.image
+                              ? article.author.image
+                              : defaultImage
+                          }
+                          alt={article.author.name}
+                          className="comment-author-img"
+                        />
+                        <button className="btn btn-sm btn-success">
+                          Post Comment
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="no-token-request">
+                      <a href="/login">Sign in</a> or{" "}
+                      <a href="/register">Sign Up</a> to comment on this
+                      article.
+                    </div>
+                  )}
+                  {comments ? (
+                    comments.map((comment) => {
+                      return (
+                        <div className="card" key={comment.id}>
+                          <div className="card-block">
+                            <p className="card-text">{comment.body}</p>
+                          </div>
+                          <div className="card-footer">
+                            <a
+                              href={"/profile/" + comment.author.username}
+                              className="comment-author"
+                            >
+                              <img
+                                src={comment.author.image || defaultImage}
+                                className="comment-author-img"
+                                alt={comment.author.username}
+                              />
+                            </a>
+                            &nbsp;
+                            <a
+                              href={"/profile/" + comment.author.username}
+                              className="comment-author"
+                            >
+                              &nbsp;
+                              {comment.author.username}
+                            </a>
+                            &nbsp;
+                            <time
+                              className="date-posted"
+                              dateTime={article.createdAt}
+                            >
+                              {new Date(comment.createdAt).toDateString()}
+                            </time>
+                            {props.username === comment.author.username ? (
+                              <span
+                                className="comment-delete float-right"
+                                onClick={(e) => {
+                                  handleDelete(e, comment.id);
+                                }}
+                              >
+                                <i className="material-icons material-icons-outlined">
+                                  delete
+                                </i>
+                              </span>
+                            ) : (
+                              <></>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <></>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <></>
-      )}
-    </div>
+        ) : (
+          <></>
+        )}
+      </div>
+    </LoadingOverlay>
   );
 }
 

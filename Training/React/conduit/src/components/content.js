@@ -4,6 +4,7 @@ import TagList from "./taglist.js";
 import ArticlePreview from "./articlepreview.js";
 import PropTypes from "prop-types";
 import axios from "axios";
+import LoadingOverlay from "react-loading-overlay";
 import { LocalStorage } from "../services/LocalStorage";
 
 export default function Content(props) {
@@ -12,7 +13,7 @@ export default function Content(props) {
   const [isRunning, setisRunning] = useState(false);
   const [activeId, setActiveId] = useState();
   const [selectedTag, setselectedTag] = useState("");
-  // const [isupdate, setisUpdated] = useState(false);
+  const [isLoading, setisLoading] = useState(true);
   const [tagItemsList, settagItemsList] = useState([]);
   const [token, setToken] = useState("");
   const [articleObj, setarticleObj] = useState({});
@@ -43,11 +44,13 @@ export default function Content(props) {
             setisRunning(false);
             setarticleObj(response.data.articles);
             setArticleCount(response.data.articlesCount);
+            setisLoading(false);
           }
         })
         .catch((error) => {
           setisRunning(false);
           console.log(error);
+          setisLoading(false);
         });
     }
   };
@@ -55,6 +58,7 @@ export default function Content(props) {
   const getTagsFromdb = (token) => {
     if (!isRunning) {
       setisRunning(true);
+      setisLoading(true);
       axios
         .get(baseURL + "/api/tags", {
           headers: { Authorization: `Token ${token || ""}` },
@@ -63,11 +67,13 @@ export default function Content(props) {
           if (response.status === 200) {
             setisRunning(false);
             settagItemsList(response.data.tags);
+            setisLoading(false);
           }
         })
         .catch((error) => {
           setisRunning(false);
           console.log(error);
+          setisLoading(false);
         });
     }
   };
@@ -89,6 +95,7 @@ export default function Content(props) {
       if (token) {
         let obj = Object.assign({}, articleObj);
         setisRunning(true);
+        setisLoading(true);
         let followingStatus =
           event.currentTarget.classList.contains("btn-success-active");
 
@@ -110,11 +117,13 @@ export default function Content(props) {
                 });
                 handleArticleChange(obj);
                 setisRunning(false);
+                setisLoading(false);
               }
             })
             .catch((error) => {
               setisRunning(false);
               console.log(error);
+              setisLoading(false);
             });
         } else {
           axios
@@ -130,11 +139,13 @@ export default function Content(props) {
                 });
                 handleArticleChange(obj);
                 setisRunning(false);
+                setisLoading(false);
               }
             })
             .catch((error) => {
               setisRunning(false);
               console.log(error);
+              setisLoading(false);
             });
         }
       } else {
@@ -152,110 +163,125 @@ export default function Content(props) {
   };
 
   return (
-    <div className="main main-wrapper">
-      <Header />
-      <div className="container">
-        <div className="row">
-          <div className="col-md-9">
-            <div className="feed-toggle">
-              <ul className="nav nav-pills outline-active">
-                {token ? (
-                  <>
-                    <li className="nav-item">
-                      <button
-                        id="feedBtn"
-                        className={
-                          activeId === "feedBtn"
-                            ? "nav-link active"
-                            : "nav-link"
-                        }
-                        onClick={(event) =>
-                          handleClick(event, "/api/articles/feed?")
-                        }
-                      >
-                        Your Feed
-                      </button>
-                    </li>
-                    <li className="nav-item">
-                      <button
-                        id="globalBtn"
-                        className={
-                          activeId === "globalBtn"
-                            ? "nav-link active"
-                            : "nav-link"
-                        }
-                        onClick={(event) =>
-                          handleClick(event, "/api/articles?")
-                        }
-                      >
-                        Global Feed
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li className="nav-item">
-                      <button
-                        id="globalBtn"
-                        className={
-                          activeId === "globalBtn"
-                            ? "nav-link active"
-                            : "nav-link"
-                        }
-                        onClick={(event) =>
-                          handleClick(event, "/api/articles?")
-                        }
-                      >
-                        Global Feed
-                      </button>
-                    </li>
-                  </>
-                )}
+    <LoadingOverlay
+      active={isLoading}
+      spinner
+      text="Loading article..."
+      styles={{
+        overlay: (base) => ({
+          ...base,
+          background: "rgba(0, 0, 0, 0.9)",
+        }),
+      }}
+    >
+      <div className="main main-wrapper">
+        <Header />
+        <div className="container">
+          <div className="row">
+            <div className="col-md-9">
+              <div className="feed-toggle">
+                <ul className="nav nav-pills outline-active">
+                  {token ? (
+                    <>
+                      <li className="nav-item">
+                        <button
+                          id="feedBtn"
+                          className={
+                            activeId === "feedBtn"
+                              ? "nav-link active"
+                              : "nav-link"
+                          }
+                          onClick={(event) =>
+                            handleClick(event, "/api/articles/feed?")
+                          }
+                        >
+                          Your Feed
+                        </button>
+                      </li>
+                      <li className="nav-item">
+                        <button
+                          id="globalBtn"
+                          className={
+                            activeId === "globalBtn"
+                              ? "nav-link active"
+                              : "nav-link"
+                          }
+                          onClick={(event) =>
+                            handleClick(event, "/api/articles?")
+                          }
+                        >
+                          Global Feed
+                        </button>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className="nav-item">
+                        <button
+                          id="globalBtn"
+                          className={
+                            activeId === "globalBtn"
+                              ? "nav-link active"
+                              : "nav-link"
+                          }
+                          onClick={(event) =>
+                            handleClick(event, "/api/articles?")
+                          }
+                        >
+                          Global Feed
+                        </button>
+                      </li>
+                    </>
+                  )}
 
-                {selectedTag ? (
-                  <>
-                    <li id="tagNavPill" className="nav-item">
-                      <button
-                        id="tagBbtn"
-                        className={
-                          activeId === "tagBbtn"
-                            ? "nav-link active"
-                            : "nav-link"
-                        }
-                        onClick={(event) =>
-                          handleClick(
-                            event,
-                            "/api/articles?tag=" + selectedTag + "&"
-                          )
-                        }
-                      >
-                        {"#" + selectedTag}
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <></>
-                )}
-              </ul>
+                  {selectedTag ? (
+                    <>
+                      <li id="tagNavPill" className="nav-item">
+                        <button
+                          id="tagBbtn"
+                          className={
+                            activeId === "tagBbtn"
+                              ? "nav-link active"
+                              : "nav-link"
+                          }
+                          onClick={(event) =>
+                            handleClick(
+                              event,
+                              "/api/articles?tag=" + selectedTag + "&"
+                            )
+                          }
+                        >
+                          {"#" + selectedTag}
+                        </button>
+                      </li>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </ul>
+              </div>
+              {
+                <ArticlePreview
+                  article={articleObj}
+                  handleClick={handleBtnClick}
+                />
+              }
             </div>
-            {
-              <ArticlePreview
-                article={articleObj}
-                handleClick={handleBtnClick}
-              />
-            }
-          </div>
-          <div className="col-md-3">
-            <div className="card sidebar mt-2">
-              <div className="card-body">
-                <h6 className="card-title">Popular Tags</h6>
-                <TagList tagLists={tagItemsList} handleClick={handletagClick} />
+            <div className="col-md-3">
+              <div className="card sidebar mt-2">
+                <div className="card-body">
+                  <h6 className="card-title">Popular Tags</h6>
+                  <TagList
+                    tagLists={tagItemsList}
+                    handleClick={handletagClick}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </LoadingOverlay>
   );
 }
 

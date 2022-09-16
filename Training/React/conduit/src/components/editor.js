@@ -2,11 +2,13 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { LocalStorage } from "../services/LocalStorage";
+import LoadingOverlay from "react-loading-overlay";
 
 function Editor(props) {
   const baseURL = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
   const [isRunning, setisRunning] = useState(false);
+  const [isLoading, setisLoading] = useState(false);
   const [isEditMode, setisEditMode] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -40,10 +42,12 @@ function Editor(props) {
           setDescription(obj.description);
           setTitle(obj.title);
           setTagList(obj.tagList);
+          setisLoading(false);
         }
       })
       .catch((error) => {
         setisRunning(false);
+        setisLoading(false);
         console.log(error);
       });
   };
@@ -67,6 +71,7 @@ function Editor(props) {
 
   const submitForm = (event) => {
     event.preventDefault();
+    setisLoading(true);
     let url = baseURL + "/api/articles";
     let slug = "";
     let articleData = {
@@ -92,10 +97,12 @@ function Editor(props) {
             window.location.pathname = "/article/" + slug;
             navigate("/", {});
             setisRunning(false);
+            setisLoading(false);
           }
         })
         .catch((error) => {
           setisRunning(false);
+          setisLoading(false);
           console.log(error);
         });
     } else if (!isRunning && isEditMode) {
@@ -113,91 +120,105 @@ function Editor(props) {
             slug = response.data.article.slug;
             window.location.pathname = "/article/" + slug;
             setisRunning(false);
+            setisLoading(false);
           }
         })
         .catch((error) => {
           setisRunning(false);
+          setisLoading(false);
           console.log(error);
         });
     }
   };
 
   return (
-    <div className="editor-page container">
-      <div className="row">
-        <div className="col-md-10 offset-md-1 col-xs-12">
-          <h1 className="text-center">Editor</h1>
-          <form>
-            <div>
-              <div className="form-group">
-                <input
-                  className="form-control form-control-lg"
-                  type="text"
-                  placeholder="Article Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <input
-                  className="form-control"
-                  type="text"
-                  placeholder="What's this article about?"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <textarea
-                  className="form-control"
-                  rows="8"
-                  placeholder="Write your article (in markdown)"
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <input
-                  className="form-control"
-                  type="text"
-                  placeholder="Enter tags"
-                  value={tagInput}
-                  onChange={changeTagInput}
-                  onKeyUp={addTag}
-                />
-
-                <div className="tag-list editor-tag-pill">
-                  {tagList.map((tag) => {
-                    return (
-                      <span className="tag-default tag-pill" key={tag}>
-                        <span
-                          className="material-icons material-icons-outlined"
-                          onClick={removeTag(tag)}
-                        >
-                          close
-                        </span>
-                        <span>{tag}</span>
-                      </span>
-                    );
-                  })}
+    <LoadingOverlay
+      active={isLoading}
+      spinner
+      text="Loading article..."
+      styles={{
+        overlay: (base) => ({
+          ...base,
+          background: "rgba(0, 0, 0, 0.9)",
+        }),
+      }}
+    >
+      <div className="editor-page container">
+        <div className="row">
+          <div className="col-md-10 offset-md-1 col-xs-12">
+            <h1 className="text-center">Editor</h1>
+            <form>
+              <div>
+                <div className="form-group">
+                  <input
+                    className="form-control form-control-lg"
+                    type="text"
+                    placeholder="Article Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
                 </div>
-              </div>
 
-              <button
-                className="btn btn-lg float-right btn-success"
-                type="button"
-                onClick={submitForm}
-              >
-                Publish Article
-              </button>
-            </div>
-          </form>
+                <div className="form-group">
+                  <input
+                    className="form-control"
+                    type="text"
+                    placeholder="What's this article about?"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <textarea
+                    className="form-control"
+                    rows="8"
+                    placeholder="Write your article (in markdown)"
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <input
+                    className="form-control"
+                    type="text"
+                    placeholder="Enter tags"
+                    value={tagInput}
+                    onChange={changeTagInput}
+                    onKeyUp={addTag}
+                  />
+
+                  <div className="tag-list editor-tag-pill">
+                    {tagList.map((tag) => {
+                      return (
+                        <span className="tag-default tag-pill" key={tag}>
+                          <span
+                            className="material-icons material-icons-outlined"
+                            onClick={removeTag(tag)}
+                          >
+                            close
+                          </span>
+                          <span>{tag}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <button
+                  className="btn btn-lg float-right btn-success"
+                  type="button"
+                  onClick={submitForm}
+                >
+                  Publish Article
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </LoadingOverlay>
   );
 }
 
