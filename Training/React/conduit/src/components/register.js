@@ -52,17 +52,19 @@ function Register() {
   };
 
   const sendDataToDatabase = (profileDetailsObj) => {
-    let user = profileDetailsObj.user;
-    axios
-      .post(baseURL + "/api/users", {
-        user,
-      })
-      .then((response) => {
-        handleResponse(response);
-      })
-      .catch((error) => {
-        setError(error);
-      });
+    if (profileDetailsObj != null && profileDetailsObj !== "") {
+      let user = profileDetailsObj.user;
+      axios
+        .post(baseURL + "/api/users", {
+          user,
+        })
+        .then((response) => {
+          handleResponse(response);
+        })
+        .catch((error) => {
+          setError(error);
+        });
+    }
   };
 
   const responseGoogleOauth = (response) => {

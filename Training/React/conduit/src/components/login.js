@@ -36,7 +36,7 @@ function Login() {
   };
 
   const responseGoogleOauth = (response) => {
-    // console.log(response);
+    // console.log(createGoogleOauthObject(response));
     sendDataToDatabase(createGoogleOauthObject(response));
   };
 

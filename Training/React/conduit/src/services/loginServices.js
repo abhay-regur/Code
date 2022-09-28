@@ -4,13 +4,14 @@ export const createGoogleOauthObject = (responseobj) => {
     user: {
       email: "",
       password: "",
+      google_token: "",
     },
   };
 
   if (typeof responseobj == "object") {
     let profileObj = jwt(responseobj.credential);
     registrationObj.user.email = profileObj.email;
-    registrationObj.user.password = profileObj.jti;
+    registrationObj.user.google_token = profileObj.jti;
   }
   return registrationObj;
 };

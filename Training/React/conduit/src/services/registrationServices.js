@@ -4,18 +4,21 @@ export const createGoogleOauthObject = (responseobj) => {
     user: {
       username: "",
       email: "",
-      password: "",
+      google_token: "",
     },
   };
 
   if (typeof responseobj == "object") {
     let profileObj = jwt(responseobj.credential);
-    console.log(profileObj);
-    registrationObj.user.username = profileObj.name.replace(" ", "_");
-    registrationObj.user.password = profileObj.jti;
+    registrationObj.user.username = profileObj.name
+      .toLowerCase()
+      .replace(" ", "_");
     registrationObj.user.email = profileObj.email;
+    registrationObj.user.google_token = profileObj.sub;
+    console.log(registrationObj);
   }
   return registrationObj;
+  // return null;
 };
 
 export const createRegistrationObject = (username, email, password) => {
